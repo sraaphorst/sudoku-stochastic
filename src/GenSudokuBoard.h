@@ -27,6 +27,9 @@ namespace sudoku_stochastic {
      * 2. N^2 columns;
      * 3. N x N subgrids of size N x N.
      * 3. N^2 symbols [1,N^2], and a reserved symbol, 0, that indicates the board cell is not yet fixed.
+     *
+     * Note that we don't worry about constexpr here, as we want to use OpenMP, which is not compatible.
+     *
      * @tparam N the size parameter
      */
     template<size_t N = 3,
@@ -61,24 +64,24 @@ namespace sudoku_stochastic {
             contents = c;
         }
 
-        explicit GenSudokuBoard(board_contents &&c) {
+        explicit constexpr GenSudokuBoard(board_contents &&c) {
             check_contents(c);
             contents = std::move(c);
         }
 
-        GenSudokuBoard &operator=(const GenSudokuBoard&) noexcept = default;
+        constexpr GenSudokuBoard &operator=(const GenSudokuBoard&) noexcept = default;
 
-        bool operator==(const GenSudokuBoard &other) noexcept {
+        constexpr bool operator==(const GenSudokuBoard &other) noexcept {
             return contents == other.contents;
         };
-        bool operator!=(const GenSudokuBoard &other) noexcept {
+        constexpr bool operator!=(const GenSudokuBoard &other) noexcept {
             return !(*this == other);
         };
 
         /**
          * Accessors.
          */
-        const size_t operator[](const std::pair<size_t, size_t> &pos) const noexcept {
+        constexpr const size_t operator[](const std::pair<size_t, size_t> &pos) const noexcept {
             const auto [row, col] = pos;
             return contents[row * NN + col];
         }
@@ -89,7 +92,7 @@ namespace sudoku_stochastic {
             return contents[row * NN + col];
         }
 
-        const size_t operator[](size_t pos) const noexcept {
+        constexpr const size_t operator[](size_t pos) const noexcept {
             assert(pos < BoardSize);
             return contents[pos];
         }
@@ -104,7 +107,7 @@ namespace sudoku_stochastic {
          * Determine if the board is complete, i.e. it contains no zeroes.
          * @return true if complete, false otherwise
          */
-        bool isComplete() const noexcept {
+        constexpr bool isComplete() const noexcept {
             return std::find(std::cbegin(contents), std::cend(contents), 0) == std::cend(contents);
         }
 
@@ -131,7 +134,7 @@ namespace sudoku_stochastic {
          * Determine if a board is done. This will only be the case when the board is complete and has no errors.
          */
         bool isDone() const noexcept {
-            return isComplete() && findErrorRepresentative() == 0;
+            return isComplete() && findNumberOfErrors() == 0;
         }
 
         /**
@@ -153,7 +156,11 @@ namespace sudoku_stochastic {
             return digitCounts;
         }
 
-        size_t findErrorRepresentative() const noexcept {
+        /**
+         * Calculate the number of errors on a Sudoku board, i.e. the number of violations that occur.
+         * @return the number of errorsd
+         */
+        size_t findNumberOfErrors() const noexcept {
             std::mutex error_add;
             size_t errorCount = 0;
 
@@ -177,7 +184,7 @@ namespace sudoku_stochastic {
          * @param contents the contents to check
          */
         template<typename B>
-        static void check_contents(B &&contents) {
+        constexpr static void check_contents(B &&contents) {
             for (size_t i = 0; i < BoardSize; ++i)
                 if (contents[i] > NN)
                     throw std::invalid_argument(boost::format("illegal digit at position (%1%,%2$): %3%")
@@ -189,7 +196,7 @@ namespace sudoku_stochastic {
          * @param pos position
          * @return the row
          */
-        static size_t posToRow(size_t pos) noexcept {
+        constexpr static size_t posToRow(size_t pos) noexcept {
             assert(pos < BoardSize);
             return pos / NN;
         }
@@ -199,7 +206,7 @@ namespace sudoku_stochastic {
          * @param pos position
          * @return the column
          */
-        static size_t posToCol(size_t pos) {
+        constexpr static size_t posToCol(size_t pos) {
             assert(pos < BoardSize);
             return pos % NN;
         }
@@ -209,9 +216,9 @@ namespace sudoku_stochastic {
          * @param pos position
          * @return (i,j) representing the grid
          */
-        static std::pair<size_t, size_t> posToGrid(size_t pos) {
+        constexpr static std::pair<size_t, size_t> posToGrid(size_t pos) {
             assert(pos < BoardSize);
-            const size_t gridx = (pos / NN) % N;
+            const size_t gridx = (pos / NN) / N;
             const size_t gridy = (pos % NN) / N;
             assert(gridx < N);
             assert(gridy < N);
@@ -226,10 +233,6 @@ namespace sudoku_stochastic {
          * For example, having two 1s in a row would be considered a row restriction violation.
          * For positions where the contents are not yet set, there is no restriction violation.
          *
-         * Note that the sum of this method across all cells does not provide the exact number of
-         * restriction violations in the board, as there is overcounting: for example, if 1 appears twice in row 0,
-         * it will count as two row restrictions. If it appears thrice, it will count at 3! = 6 restrictions.
-         *
          * @param pos the position for which to calculate restrictions
          * @return the number of restrictions that the contents of this position induces
          */
@@ -240,96 +243,53 @@ namespace sudoku_stochastic {
             if (contents[pos] == 0)
                 return 0;
 
+            // Mutexes to control adding to error sums.
             std::mutex row_mutex, col_mutex, grid_mutex;
-            size_t rowerrors = 0;
-            size_t colerrors = 0;
+            size_t rowerrors  = 0;
+            size_t colerrors  = 0;
             size_t griderrors = 0;
 
-            size_t row = pos / NN;
-            size_t col = pos % NN;
+            const auto digit = contents[pos];
+            const auto row   = posToRow(pos);
+            const auto col   = posToCol(pos);
 
-            // 00 01 02 00 01 02
-            // 10 11 12 10 11 12
-            //size_t gridx = pos / N;
-            //size_t gridy = pos % NN;
-            size_t gridx = pos / NN / N;
-            size_t gridy = (pos % NN) / N;
+            // pos falls into the grid (xgrid, ygrid).
+            const auto gridXY = posToGrid(pos);
 
-            size_t digit = contents[pos];
 
-//            //#pragma omp parallel for shared(rowerrors, colerrors, griderrors, contents)
-//            for (size_t i = 0; i < NN; ++i) {
-//                // Check row.
-//                if (contents[row * NN + i] == dig) {
-//                    std::lock_guard<std::mutex> guard{row_mutex};
-//                    ++rowerrors;
-//                    std::cerr<< "Error in row pos=" << pos << ", pos2=" << (row * NN + i) << ", value=" << dig << '\n';
-//                }
-//                // Check column.
-//                if (contents[i * NN + col] == dig) {
-//                    std::lock_guard<std::mutex> guard{col_mutex};
-//                    ++colerrors;
-//                    std::cerr<< "Error in col pos=" << pos << ", pos2=" << (i * NN + col) << ", value=" << dig << '\n';
-//                }
-//
-//                // Check grid.
-//                const size_t xrow = xgrid * N + i / N;
-//                const size_t yrow = ygrid * N + i % N;
-//                //const size_t gpos = (xgrid * N + xgridpos) * N + (ygrid * N + ygridpos);
-//                const size_t gpos = xrow * NN + yrow;
-//                std::cerr << "pos=" << pos << ", (" << xgrid << "," << ygrid << ") = gridpos=" << gpos << '\n';
-//                if (contents[gpos] == dig) {
-//                    std::lock_guard<std::mutex> guard{grid_mutex};
-//                    ++griderrors;
-//                    std::cerr<< "Error in grid pos=" << pos << ", gpos=" << gpos << ", value=" << dig << '\n';
-//                }
-//            }
-            std::cerr << "***** POSITION " << row << "," << col << " *****\n";
-            std::cerr << "*** ROWS ***\n";
-            std::cerr << "Looking in row " << row << ":";
+            // We can't bind gridXY and then pass it in.
+            #pragma omp parallel for shared(rowerrors, colerrors, griderrors, contents, row, col, digit, gridXY)
             for (size_t i = 0; i < NN; ++i) {
-                std::cerr << ' ' << (row * NN + i);
-                if (contents[row * NN + i] == digit) {
+                // Handle row errors.
+                const size_t rowpos = row * NN + i;
+                if (rowpos < pos && contents[rowpos] == digit) {
                     std::lock_guard<std::mutex> guard{row_mutex};
                     ++rowerrors;
-                    std::cerr << ':' << i;
                 }
-            }
-            std::cerr << "\n";
 
-            std::cerr << "*** COLS ***\n";
-            std::cerr << "Looking in column " << row << ":";
-            for (size_t i = 0; i < NN; ++i) {
-                std::cerr << ' ' << (i * NN + col);
-                if (contents[i * NN + col] == digit) {
+                // Handle column errors.
+                const size_t colpos = i * NN + col;
+                if (colpos < pos && contents[colpos] == digit) {
                     std::lock_guard<std::mutex> guard{row_mutex};
                     ++rowerrors;
-                    std::cerr << ':' << i;
                 }
-            }
-            std::cerr << '\n';
 
-            std::cerr << "*** GRIDS ***\n";
-            std::cerr << "Looking in grid (" << gridx << ',' << gridy << "):";
-            for (size_t i = 0; i < NN; ++i) {
-                const size_t grow = i / N;
-                const size_t gcol = i % N;
-                //const size_t gpos = (N * gridx + grow) * NN + (N * gridy + gcol) * N;
-                const size_t gpos = NN * (N * gridx + grow) + N * gridy + gcol;
-                std::cerr << " ("  << grow << "," << gcol << ':' << (N * gridx + grow) << "," << (N * gridy + gcol) << ":" << gpos << ")";
-                if (contents[gpos] == digit) {
+                // Handle grid errors.
+                const auto [gridX, gridY] = gridXY;
+                const size_t gridrow = i / N;
+                const size_t gridcol = i % N;
+                const size_t gridpos = NN * (N * gridX + gridrow) + N * gridY + gridcol;
+                if (gridpos < pos && contents[gridpos] == digit) {
                     std::lock_guard<std::mutex> guard{row_mutex};
                     ++rowerrors;
-                    std::cerr << ':' << i;
                 }
             }
-            std::cerr << "\n";
 
             // Now we return the error count - 3 because we counted the digit in this position three times.
-            const size_t errors = rowerrors + colerrors + griderrors - 3;
-            std::cerr << "ERRORS: " << rowerrors << " + " << colerrors << " + " << griderrors << " -3 = " << errors << "\n\n";
-            assert(errors <= BoardSize - 3);
-            return errors;
+            assert(rowerrors  < N);
+            assert(colerrors  < N);
+            assert(griderrors < N);
+            return rowerrors + colerrors + griderrors;
         }
     };
 }
