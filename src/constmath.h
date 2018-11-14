@@ -18,12 +18,12 @@ namespace sudoku_stochastic::math {
     /// Convert from a char in base 36 (0-9, A-Z).
     constexpr size_t fromBase36(unsigned char c) {
         const char uc = cToUpper(c);
-        if (c >= '0' && c <= '9')
-            return c - '0';
-        else if (c >= 'A' && c <= 'Z')
-            return static_cast<size_t>(10 + c - 'A');
+        if (uc >= '0' && uc <= '9')
+            return static_cast<size_t>(uc - '0');
+        else if (uc >= 'A' && uc <= 'Z')
+            return static_cast<size_t>(uc - 'A') + 10;
         else
-            return c;
+            return static_cast<size_t>(uc);
     }
 
     /// Convert from a base 36 digit to a char.

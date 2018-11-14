@@ -102,14 +102,31 @@ namespace sudoku_stochastic {
             return contents[pos];
         }
 
-
         /**
-         * Determine if the board is complete, i.e. it contains no zeroes.
-         * @return true if complete, false otherwise
+         * Determine if the board is full, i.e. it contains no zeroes.
+         * @return true if full, false otherwise
          */
-        constexpr bool isComplete() const noexcept {
+        constexpr bool isFull() const noexcept {
             return std::find(std::cbegin(contents), std::cend(contents), 0) == std::cend(contents);
         }
+
+        /**
+         * Determine if a board has valid entries, i.e. entries in the required range.
+         * We also allow zero.
+         * @return true if the board has valid entries, and false otherwise.
+         */
+         bool hasValidEntries() const noexcept {
+             bool flag = true;
+
+             #pragma omp parallel for shared(flag)
+             for (size_t i = 0; i < BoardSize; ++i) {
+                 if (!flag) continue;
+                 if (contents[i] > NN)
+                     flag = false;
+             }
+
+             return flag;
+         }
 
         /**
          * Find the set of empty positions in the board.
@@ -134,7 +151,7 @@ namespace sudoku_stochastic {
          * Determine if a board is done. This will only be the case when the board is complete and has no errors.
          */
         bool isDone() const noexcept {
-            return isComplete() && findNumberOfErrors() == 0;
+            return isFull() && hasValidEntries() && findNumberOfErrors() == 0;
         }
 
         /**
@@ -144,13 +161,12 @@ namespace sudoku_stochastic {
          * @return
          */
         std::map<size_t, size_t> findDigitCounts() const noexcept {
-            std::mutex digit_add;
-
             // Note that a map of this type will return 0 for undefined keys, which is exactly what we want.
             std::map<size_t, size_t> digitCounts;
             #pragma omp parallel for shared(digitCounts, contents)
             for (size_t pos = 0; pos < BoardSize; ++pos) {
-                std::lock_guard<std::mutex> guard{digit_add};
+                //std::lock_guard<std::mutex> guard{digit_add};
+                #pragma omp atomic update
                 ++digitCounts[contents[pos]];
             }
             return digitCounts;
@@ -161,14 +177,13 @@ namespace sudoku_stochastic {
          * @return the number of errorsd
          */
         size_t findNumberOfErrors() const noexcept {
-            std::mutex error_add;
             size_t errorCount = 0;
 
-            //#pragma omp parallel for shared(errorCount, contents)
+            #pragma omp parallel for shared(errorCount, contents)
             for (size_t pos = 0; pos < BoardSize; ++pos) {
                 size_t errors = findNumberOfErrors(pos);
                 if (errors > 0) {
-                    std::lock_guard<std::mutex> guard{error_add};
+                    #pragma omp atomic update
                     errorCount += errors;
                 }
             }
@@ -243,8 +258,6 @@ namespace sudoku_stochastic {
             if (contents[pos] == 0)
                 return 0;
 
-            // Mutexes to control adding to error sums.
-            std::mutex row_mutex, col_mutex, grid_mutex;
             size_t rowerrors  = 0;
             size_t colerrors  = 0;
             size_t griderrors = 0;
@@ -256,21 +269,20 @@ namespace sudoku_stochastic {
             // pos falls into the grid (xgrid, ygrid).
             const auto gridXY = posToGrid(pos);
 
-
             // We can't bind gridXY and then pass it in.
             #pragma omp parallel for shared(rowerrors, colerrors, griderrors, contents, row, col, digit, gridXY)
             for (size_t i = 0; i < NN; ++i) {
                 // Handle row errors.
                 const size_t rowpos = row * NN + i;
                 if (rowpos < pos && contents[rowpos] == digit) {
-                    std::lock_guard<std::mutex> guard{row_mutex};
+                    #pragma omp atomic update
                     ++rowerrors;
                 }
 
                 // Handle column errors.
                 const size_t colpos = i * NN + col;
                 if (colpos < pos && contents[colpos] == digit) {
-                    std::lock_guard<std::mutex> guard{row_mutex};
+                    #pragma omp atomic update
                     ++rowerrors;
                 }
 
@@ -280,7 +292,7 @@ namespace sudoku_stochastic {
                 const size_t gridcol = i % N;
                 const size_t gridpos = NN * (N * gridX + gridrow) + N * gridY + gridcol;
                 if (gridpos < pos && contents[gridpos] == digit) {
-                    std::lock_guard<std::mutex> guard{row_mutex};
+                    #pragma omp atomic update
                     ++rowerrors;
                 }
             }
