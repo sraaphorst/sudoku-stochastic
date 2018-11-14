@@ -15,8 +15,27 @@ TEST_CASE("Create from string") {
     REQUIRE(!b.isComplete());
 }
 
-TEST_CASE("Create completed board") {
+TEST_CASE("Test completed board") {
     SudokuBoard b("126389457738425169549617832374852916892176543651943728983561274417238695265794381");
     REQUIRE(b.isComplete());
     REQUIRE(b.isDone());
+}
+
+TEST_CASE("Test error counting") {
+    // Errors in this board: 6
+    // 1 error:  two 9s in row 0
+    // 3 errors: three 1s in col 0
+    // 1 error:  two 1s in grid (0,0)
+    // 1 error:  two 9s in grid (1,2)
+    SudokuBoard b("102987459"
+                  "134652798"
+                  "785134260"
+                  "100000000"
+                  "000000000"
+                  "000000000"
+                  "000000000"
+                  "000000000"
+                  "000000000");
+    REQUIRE(!b.isComplete());
+    REQUIRE(b.findNumberOfErrors() == 6);
 }
