@@ -12,11 +12,11 @@
 #include <iterator>
 #include <map>
 #include <mutex>
-#include <set>
 #include <stdexcept>
 #include <string_view>
+#include <unordered_set>
+
 #include <boost/format.hpp>
-#include <iostream>
 
 #include "constmath.h"
 
@@ -60,12 +60,12 @@ namespace sudoku_stochastic {
         }
 
         explicit constexpr GenSudokuBoard(const board_contents &c) {
-            check_contents(c);
+            checkContents(c);
             contents = c;
         }
 
         explicit constexpr GenSudokuBoard(board_contents &&c) {
-            check_contents(c);
+            checkContents(c);
             contents = std::move(c);
         }
 
@@ -132,20 +132,20 @@ namespace sudoku_stochastic {
          * Find the set of empty positions in the board.
          * @return the empty positions
          */
-        std::set<size_t> findEmptyPositions() const noexcept {
-            std::mutex set_add;
-            std::set<size_t> empty;
-
-            #pragma omp parallel for shared(empty, contents)
-            for (size_t i = 0; i < BoardSize; ++i) {
-                if (contents[i] == 0) {
-                    std::lock_guard<std::mutex> guard{set_add};
-                    empty.insert(i);
-                }
-            }
-
-            return empty;
-        }
+//        std::unordered_set<size_t> findEmptyPositions() const noexcept {
+//            std::mutex set_add;
+//            std::unordered_set<size_t> empty;
+//
+//            #pragma omp parallel for shared(empty, contents)
+//            for (size_t i = 0; i < BoardSize; ++i) {
+//                if (contents[i] == 0) {
+//                    std::lock_guard<std::mutex> guard{set_add};
+//                    empty.insert(i);
+//                }
+//            }
+//
+//            return empty;
+//        }
 
         /**
          * Determine if a board is done. This will only be the case when the board is complete and has no errors.
@@ -199,7 +199,7 @@ namespace sudoku_stochastic {
          * @param contents the contents to check
          */
         template<typename B>
-        constexpr static void check_contents(B &&contents) {
+        constexpr static void checkContents(B &&contents) {
             for (size_t i = 0; i < BoardSize; ++i)
                 if (contents[i] > NN)
                     throw std::invalid_argument(boost::format("illegal digit at position (%1%,%2$): %3%")

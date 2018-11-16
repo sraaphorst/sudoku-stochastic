@@ -11,6 +11,7 @@
 #include <set>
 #include <string_view>
 #include <tuple>
+#include <unordered_set>
 
 #include "SudokuBoard.h"
 
@@ -49,38 +50,14 @@ TEST_CASE("Test error counting") {
 }
 
 // Convert a set of positions as pairs to a set of positions as indices.
-std::set<size_t> pairToPos(const std::set<std::pair<size_t, size_t>> &pairs) {
-    std::set<size_t> pos{};
+std::unordered_set<size_t> pairToPos(const std::set<std::pair<size_t, size_t>> &pairs) {
+    std::unordered_set<size_t> pos{};
     std::transform(std::cbegin(pairs), std::cend(pairs),
             std::inserter(pos, std::begin(pos)),
             [] (const auto &p) {
         return p.first * 9 + p.second;
     });
     return std::move(pos);
-}
-
-TEST_CASE("Test findEmptyPositions") {
-    constexpr SudokuBoard b{
-        "102345678"
-        "098765430"
-        "444000444"
-        "987654321"
-        "001234500"
-        "635281263"
-        "090807060"
-        "654321987"
-        "000000000"
-    };
-
-    std::set<std::pair<size_t, size_t>> pairs{
-            {0, 1},
-            {1, 0}, {1, 8},
-            {2, 3}, {2, 4}, {2, 5},
-            {4, 0}, {4, 1}, {4, 7}, {4, 8},
-            {6, 0}, {6, 2}, {6, 4}, {6, 6}, {6, 8},
-            {8, 0}, {8, 1}, {8, 2}, {8, 3}, {8, 4}, {8, 5}, {8, 6}, {8, 7}, {8, 8}
-    };
-    REQUIRE(pairToPos(pairs) == b.findEmptyPositions());
 }
 
 TEST_CASE("Test hasValidEntries") {

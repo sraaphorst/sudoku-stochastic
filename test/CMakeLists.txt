@@ -19,3 +19,6 @@ target_link_libraries(tests Catch)
 
 add_executable(TestSudokuBoard TestSudokuBoard.cpp ${TEST_SOURCES})
 target_link_libraries(TestSudokuBoard PRIVATE Catch sudoku_stochastic OpenMP::OpenMP_CXX)
+
+add_executable(TestSudokuBoardFiller TestSudokuBoardFiller.cpp ${TEST_SOURCES})
+target_link_libraries(TestSudokuBoardFiller PRIVATE Catch sudoku_stochastic OpenMP::OpenMP_CXX)
