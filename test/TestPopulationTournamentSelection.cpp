@@ -32,11 +32,8 @@ TEST_CASE("Choose a population of size k") {
     for (int i = 0; i < 50; ++i)
         sudokus[i] = filler.generateRandomBoard();
 
-    // Pick 10 from sets of 5.
-    std::vector<SudokuBoard> out{5};
-
-    selections::tournamentSelection(5, std::begin(sudokus), std::end(sudokus), std::begin(out),
-            [](const auto &s1, const auto &s2) { return s1.fitness() < s2.fitness(); });
+    selections::tournamentSelection(5, std::begin(sudokus), std::end(sudokus),
+            [](const auto &s) { return s.fitness(); });
     std::vector<size_t> candidates{10};
     //for (int i = 0; i < 10; ++i)
 

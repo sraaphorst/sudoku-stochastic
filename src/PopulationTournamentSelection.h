@@ -21,15 +21,24 @@ namespace sudoku_stochastic::selections {
      * Perform a k-tournament selection, i.e. pick k population members randomly and return the most fit.
      * @return the most fit out of a k-sample
      */
-    template<typename Iter, typename OutIter, typename Fitness>
-    Iter tournamentSelection(size_t k, Iter begin, Iter end, OutIter outbegin, Fitness f) {
-        if (std::distance(end, begin) < k)
+    template<typename Iter, typename Fitness>
+    Iter tournamentSelection(size_t k, Iter begin, Iter end, Fitness f) {
+        const auto dist = static_cast<unsigned long long>(std::distance(begin, end));
+        if (dist < k)
             return end;
 
         std::random_device rd;
         std::mt19937 gen(rd());
-        std::sample(begin, end, outbegin, k, gen);
-        return std::max_element(outbegin, outbegin + k, f);
+
+        // This is irritatingly complicated because we want an Iter, and not its value type.
+        // We are sampling over the indices of the whole population, which is not efficient.
+        // TODO: This could certainly be improved.
+        std::vector<size_t> indices{dist};
+        std::iota(std::begin(indices), std::end(indices), 0);
+        std::vector<size_t> out{k};
+        std::sample(std::begin(indices), std::end(indices), std::back_inserter(out), k, gen);
+        return std::max_element(begin, end,
+                [&f, &begin](const auto s1, const auto s2) { return f(s1) < f(s2); });
     }
 
     /**
