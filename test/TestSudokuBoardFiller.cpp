@@ -25,7 +25,8 @@ TEST_CASE("Create a board where every row is a permutation") {
                   "060090300"};
     REQUIRE(!b.isFull());
     SudokuBoardFiller filler{b};
-    for (int bnum = 0; bnum < 100; ++bnum) {
+
+    for (int bnum = 0; bnum < 10'000; ++bnum) {
         const auto board = filler.generateRandomBoard();
 
         // Check each row.

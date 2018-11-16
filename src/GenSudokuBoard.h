@@ -129,52 +129,16 @@ namespace sudoku_stochastic {
          }
 
         /**
-         * Find the set of empty positions in the board.
-         * @return the empty positions
-         */
-//        std::unordered_set<size_t> findEmptyPositions() const noexcept {
-//            std::mutex set_add;
-//            std::unordered_set<size_t> empty;
-//
-//            #pragma omp parallel for shared(empty, contents)
-//            for (size_t i = 0; i < BoardSize; ++i) {
-//                if (contents[i] == 0) {
-//                    std::lock_guard<std::mutex> guard{set_add};
-//                    empty.insert(i);
-//                }
-//            }
-//
-//            return empty;
-//        }
-
-        /**
          * Determine if a board is done. This will only be the case when the board is complete and has no errors.
          */
         bool isDone() const noexcept {
             return isFull() && hasValidEntries() && findNumberOfErrors() == 0;
         }
 
-        /**
-         * Return a map of the count of the digits in the board.
-         * This can be used, for example, to randomly populate the rest of the board while making
-         * sure that each element appears the same number of times.
-         * @return
-         */
-        std::map<size_t, size_t> findDigitCounts() const noexcept {
-            // Note that a map of this type will return 0 for undefined keys, which is exactly what we want.
-            std::map<size_t, size_t> digitCounts;
-            #pragma omp parallel for shared(digitCounts, contents)
-            for (size_t pos = 0; pos < BoardSize; ++pos) {
-                //std::lock_guard<std::mutex> guard{digit_add};
-                #pragma omp atomic update
-                ++digitCounts[contents[pos]];
-            }
-            return digitCounts;
-        }
 
         /**
          * Calculate the number of errors on a Sudoku board, i.e. the number of violations that occur.
-         * @return the number of errorsd
+         * @return the number of errors
          */
         size_t findNumberOfErrors() const noexcept {
             size_t errorCount = 0;
@@ -189,6 +153,14 @@ namespace sudoku_stochastic {
             }
 
             return errorCount;
+        }
+
+        /**
+         * Return the fitness of the board, i.e. the maxinum number of possible errors minus the number of errors.
+         * @return maxerrors - errors
+         */
+        size_t fitness() const {
+            return 3 * BoardSize * (NN - 1) - findNumberOfErrors();
         }
 
     private:
@@ -298,9 +270,9 @@ namespace sudoku_stochastic {
             }
 
             // Now we return the error count - 3 because we counted the digit in this position three times.
-            assert(rowerrors  < N);
-            assert(colerrors  < N);
-            assert(griderrors < N);
+            assert(rowerrors  < NN);
+            assert(colerrors  < NN);
+            assert(griderrors < NN);
             return rowerrors + colerrors + griderrors;
         }
     };

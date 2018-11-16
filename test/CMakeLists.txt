@@ -22,3 +22,6 @@ target_link_libraries(TestSudokuBoard PRIVATE Catch sudoku_stochastic OpenMP::Op
 
 add_executable(TestSudokuBoardFiller TestSudokuBoardFiller.cpp ${TEST_SOURCES})
 target_link_libraries(TestSudokuBoardFiller PRIVATE Catch sudoku_stochastic OpenMP::OpenMP_CXX)
+
+add_executable(TestPopulationTournamentSelection TestPopulationTournamentSelection.cpp ${TEST_SOURCES})
+target_link_libraries(TestPopulationTournamentSelection PRIVATE Catch sudoku_stochastic OpenMP::OpenMP_CXX)
