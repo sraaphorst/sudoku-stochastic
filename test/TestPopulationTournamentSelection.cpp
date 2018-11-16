@@ -9,7 +9,7 @@
 #include <array>
 #include <functional>
 
-#include "PopulationTournamentSelection.h"
+#include "PopulationSelector.h"
 #include "SudokuBoard.h"
 #include "SudokuBoardFiller.h"
 
@@ -32,9 +32,7 @@ TEST_CASE("Choose a population of size k") {
     for (int i = 0; i < 50; ++i)
         sudokus[i] = filler.generateRandomBoard();
 
-    selections::tournamentSelection(5, std::begin(sudokus), std::end(sudokus),
+    genetic::tournamentSelection(5, std::begin(sudokus), std::end(sudokus),
             [](const auto &s) { return s.fitness(); });
-    std::vector<size_t> candidates{10};
-    //for (int i = 0; i < 10; ++i)
 
 }
