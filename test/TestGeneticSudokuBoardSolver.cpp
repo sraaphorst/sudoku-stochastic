@@ -33,5 +33,11 @@ TEST_CASE("Solve a simple sudoku puzzle") {
     options.population_size = 50;
     options.min_populator_size = 3;
 
-    solver::run(options);
+    const auto &sol = solver::run(options);
+    std::cout << "Best solution found has fitness " << sol->fitness() << ":\n";
+    for (size_t row = 0; row < 9; ++row) {
+        for (size_t col = 0; col < 9; ++col)
+            std::cout << (*sol)[row * 9 + col];
+        std::cout << '\n';
+    }
 }
