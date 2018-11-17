@@ -124,7 +124,7 @@ namespace vorpal::gensudoku {
         bool hasValidEntries() const noexcept {
              bool flag = true;
 
-             #pragma omp parallel for shared(flag)
+             //#pragma omp parallel for shared(flag)
              for (size_t i = 0; i < BoardSize; ++i) {
                  if (!flag) continue;
                  if (contents[i] > NN)
@@ -180,9 +180,8 @@ namespace vorpal::gensudoku {
         static void checkContents(B &&contents) {
             for (size_t i = 0; i < BoardSize; ++i)
                 if (contents[i] > NN)
-//                    throw std::invalid_argument(boost::format("illegal digit at position (%1%,%2$): %3%")
-//                                                % (i / 9) % (i % 9) % contents[i]);
-                    throw std::invalid_argument("no");
+                    throw std::invalid_argument(boost::format("illegal digit at position (%1%,%2$): %3%")
+                                                % (i / 9) % (i % 9) % contents[i]);
         }
 
         /**
@@ -237,19 +236,22 @@ namespace vorpal::gensudoku {
             if (contents[pos] == 0)
                 return 0;
 
-            size_t rowerrors  = 0;
-            size_t colerrors  = 0;
+            size_t rowerrors = 0;
+            size_t colerrors = 0;
             size_t griderrors = 0;
 
             const auto digit = contents[pos];
-            const auto row   = posToRow(pos);
-            const auto col   = posToCol(pos);
+            const auto row = posToRow(pos);
+            const auto col = posToCol(pos);
 
             // pos falls into the grid (xgrid, ygrid).
             const auto gridXY = posToGrid(pos);
+            const auto gridX = gridXY.first;
+            const auto gridY = gridXY.second;
 
             // We can't bind gridXY and then pass it in.
-            //#pragma omp parallel for shared(rowerrors, colerrors, griderrors, contents, row, col, digit, gridXY)
+            // Using OpenMP here dramatically slows down the execution speed. I'm not sure why.
+            //#pragma omp for
             for (size_t i = 0; i < NN; ++i) {
                 // Handle row errors.
                 const size_t rowpos = row * NN + i;
@@ -262,17 +264,16 @@ namespace vorpal::gensudoku {
                 const size_t colpos = i * NN + col;
                 if (colpos < pos && contents[colpos] == digit) {
                     //#pragma omp atomic update
-                    ++rowerrors;
+                    ++colerrors;
                 }
 
                 // Handle grid errors.
-                const auto [gridX, gridY] = gridXY;
                 const size_t gridrow = i / N;
                 const size_t gridcol = i % N;
                 const size_t gridpos = NN * (N * gridX + gridrow) + N * gridY + gridcol;
                 if (gridpos < pos && contents[gridpos] == digit) {
                     //#pragma omp atomic update
-                    ++rowerrors;
+                    ++griderrors;
                 }
             }
 

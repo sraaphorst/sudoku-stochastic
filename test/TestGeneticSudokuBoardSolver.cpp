@@ -30,13 +30,13 @@ TEST_CASE("Solve a simple sudoku puzzle") {
     options.max_generations = 100;
     options.mutation_probability = 0.75;
     options.populator = std::make_unique<SudokuBoardPopulator>(board);
-    options.population_size = 2000;
+    options.population_size = 500;
 
     const auto &sol = solver::run(options);
-    std::cout << "Best solution found has fitness " << sol->fitness() << ":\n";
+    std::cerr << "Best solution found has fitness " << sol->fitness() << ":\n";
     for (size_t row = 0; row < 9; ++row) {
         for (size_t col = 0; col < 9; ++col)
-            std::cout << (*sol)[row * 9 + col];
-        std::cout << '\n';
+            std::cerr << (*sol)[row * 9 + col];
+        std::cerr << '\n';
     }
 }
