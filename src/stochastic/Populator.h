@@ -14,7 +14,12 @@ namespace vorpal::stochastic {
      */
     template<typename T>
     class Populator {
+    protected:
+        Populator() = default;
+
     public:
+        virtual ~Populator() = default;
+
         using pointer_type = std::unique_ptr<T>;
 
         /**
@@ -37,5 +42,12 @@ namespace vorpal::stochastic {
          * @return the two offspring
          */
         virtual std::pair<pointer_type, pointer_type> crossover(const pointer_type &p0, const pointer_type &p1) noexcept = 0;
+
+        /**
+         * Copy the contents of one element to another to indicate survival.
+         * @param the surviving element
+         * @return a copy of it for the next generation
+         */
+         virtual pointer_type survive(const pointer_type &p) noexcept = 0;
     };
 }

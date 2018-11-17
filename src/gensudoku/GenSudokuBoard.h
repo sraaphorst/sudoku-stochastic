@@ -10,6 +10,7 @@
 
 #include <array>
 #include <iterator>
+#include <iostream>
 #include <map>
 #include <mutex>
 #include <stdexcept>
@@ -148,11 +149,11 @@ namespace vorpal::gensudoku {
         size_t findNumberOfErrors() const noexcept {
             size_t errorCount = 0;
 
-            #pragma omp parallel for shared(errorCount, contents)
+            //#pragma omp parallel for shared(errorCount, contents)
             for (size_t pos = 0; pos < BoardSize; ++pos) {
                 size_t errors = findNumberOfErrors(pos);
                 if (errors > 0) {
-                    #pragma omp atomic update
+                    //#pragma omp atomic update
                     errorCount += errors;
                 }
             }
@@ -248,19 +249,19 @@ namespace vorpal::gensudoku {
             const auto gridXY = posToGrid(pos);
 
             // We can't bind gridXY and then pass it in.
-            #pragma omp parallel for shared(rowerrors, colerrors, griderrors, contents, row, col, digit, gridXY)
+            //#pragma omp parallel for shared(rowerrors, colerrors, griderrors, contents, row, col, digit, gridXY)
             for (size_t i = 0; i < NN; ++i) {
                 // Handle row errors.
                 const size_t rowpos = row * NN + i;
                 if (rowpos < pos && contents[rowpos] == digit) {
-                    #pragma omp atomic update
+                    //#pragma omp atomic update
                     ++rowerrors;
                 }
 
                 // Handle column errors.
                 const size_t colpos = i * NN + col;
                 if (colpos < pos && contents[colpos] == digit) {
-                    #pragma omp atomic update
+                    //#pragma omp atomic update
                     ++rowerrors;
                 }
 
@@ -270,7 +271,7 @@ namespace vorpal::gensudoku {
                 const size_t gridcol = i % N;
                 const size_t gridpos = NN * (N * gridX + gridrow) + N * gridY + gridcol;
                 if (gridpos < pos && contents[gridpos] == digit) {
-                    #pragma omp atomic update
+                    //#pragma omp atomic update
                     ++rowerrors;
                 }
             }

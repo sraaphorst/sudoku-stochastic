@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <bitset>
 #include <random>
+#include <tuple>
 #include <vector>
 
 #include "Candidate.h"
@@ -47,6 +48,8 @@ namespace vorpal::gensudoku {
             initialize();
         }
 
+        ~GenSudokuBoardPopulator() = default;
+
         /**
          * Generate a random board from the partial board this class was initialized it.
          * @return a random board
@@ -55,7 +58,7 @@ namespace vorpal::gensudoku {
             // For each row, shuffle the missing entries and distribute them amongst the empty positions.
             auto board = std::make_unique<GenSudokuBoard<N>>(partial_board);
 
-            #pragma omp parallel for shared(board)
+            //#pragma omp parallel for shared(board)
             for (size_t row = 0; row < NN; ++row)
                 fillRow(board, row);
             return board;
@@ -101,15 +104,24 @@ namespace vorpal::gensudoku {
 
             for (int i = 0; i < NN; ++i) {
                 if (distribution(gen) == 0) {
-                    c0->contents[i] = p0->contents[i];
-                    c1->contents[i] = p1->contents[i];
+                    for (int j = 0; j < NN; ++j) {
+                        (*c0)[i * NN + j] = p0->contents[i * NN + j];
+                        (*c1)[i * NN + j] = p1->contents[i * NN + j];
+                    }
                 } else {
-                    c0->contents[i] = p1->contents[i];
-                    c1->contents[i] = p0->contents[i];
+                    for (int j = 0; j < NN; ++j) {
+                        (*c0)[i * NN + j] = p1->contents[i * NN + j];
+                        (*c1)[i * NN + j] = p0->contents[i * NN + j];
+                    }
                 }
             }
 
             return {std::move(c0), std::move(c1)};
+        }
+
+        pointer_type survive(const pointer_type &p) noexcept override {
+            pointer_type c = std::make_unique<GenSudokuBoard<N>>(*p);
+            return std::move(c);
         }
 
     private:
@@ -126,12 +138,12 @@ namespace vorpal::gensudoku {
             std::vector<size_t> entries = rowMissingEntries[row];
             std::shuffle(std::begin(entries), std::end(entries), gen);
 
-            #pragma omp parallel for shared(board, entries, gen)
+            //#pragma omp parallel for shared(board, entries, gen)
             for (size_t col = 0; col < entries.size(); ++col) {
                 size_t pos = row * NN + rowEmptyPositions[row][col];
                 size_t val = entries[col];
 
-                #pragma omp atomic write
+                //#pragma omp atomic write
                 (*board)[pos] = entries[col];
             }
         }

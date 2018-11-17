@@ -25,3 +25,6 @@ target_link_libraries(TestSudokuBoardFiller Catch stochastic OpenMP::OpenMP_CXX)
 
 add_executable(TestPopulationTournamentSelection TestPopulationTournamentSelection.cpp ${TEST_SOURCES})
 target_link_libraries(TestPopulationTournamentSelection Catch stochastic OpenMP::OpenMP_CXX)
+
+add_executable(TestGeneticSudokuBoardSolver TestGeneticSudokuBoardSolver.cpp ${TEST_SOURCES})
+target_link_libraries(TestGeneticSudokuBoardSolver Catch stochastic OpenMP::OpenMP_CXX)
