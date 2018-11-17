@@ -10,11 +10,12 @@
 #include <functional>
 #include <iostream>
 
-#include "genetic/PopulationSelector.h"
-#include "SudokuBoard.h"
-#include "SudokuBoardFiller.h"
+#include "PopulationSelector.h"
+#include "GenSudokuBoard.h"
+#include "GenSudokuBoardPopulator.h"
 
-using namespace sudoku_stochastic;
+using namespace vorpal::gensudoku;
+using namespace vorpal::stochastic;
 
 TEST_CASE("Choose a population of size k") {
     SudokuBoard b{"100089457"
@@ -27,21 +28,16 @@ TEST_CASE("Choose a population of size k") {
                   "007008095"
                   "060090300"};
     REQUIRE(!b.isFull());
+    
+    SudokuBoardPopulator filler{b};
+    std::vector<std::unique_ptr<SudokuBoard>> sudokus{50};
+    for (int i = 0; i < 50; ++i)
+        sudokus[i] = filler.generate();
 
-    std::cerr << "1\n";
-    SudokuBoardFiller filler{b};
-    std::cerr << "2\n";
-    std::vector<SudokuBoard> sudokus{50};
-    for (int i = 0; i < 50; ++i) {
-        std::cerr << "\t" << i << '\n';
-        sudokus[i] = filler.generateRandomBoard();
-        std::cerr << "\t" << i << '\n';
-    }
-    std::cerr << "3\n";
-    for (int i = 00; i < 10; ++i) {
-        std::cerr << "Picking...\n";
-        const auto candidate = genetic::tournamentSelection(5, std::begin(sudokus), std::end(sudokus),
-                                                             [](const auto &s) { return s.fitness(); });
-        std::cerr << "Candidate " << i << " has fitness " << candidate->fitness() << '\n';
+    for (int i = 0; i < 10; ++i) {
+        std::cerr << "Picking... ";
+        const auto candidate = tournamentSelection(5, std::begin(sudokus), std::end(sudokus),
+                [](const auto &s) { return s->fitness(); });
+        std::cerr << "Candidate " << i << " has fitness " << (*candidate)->fitness() << '\n';
     }
 }

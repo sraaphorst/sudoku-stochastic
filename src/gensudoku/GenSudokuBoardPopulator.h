@@ -24,8 +24,8 @@ namespace vorpal::gensudoku {
      * @tparam N the size parameter
      */
     template<size_t N=3,
-            const auto NN = N * N>
-    class GenSudokuBoardPopulator final: public stochastic::Populator {
+            const size_t NN = N * N>
+    class GenSudokuBoardPopulator final: public stochastic::Populator<GenSudokuBoard<N>> {
         GenSudokuBoard<N> partial_board;
         std::vector<std::vector<size_t>> rowEmptyPositions;
         std::vector<std::vector<size_t>> rowMissingEntries;
@@ -33,9 +33,9 @@ namespace vorpal::gensudoku {
     public:
         // A collection of static methods.
         GenSudokuBoardPopulator() = delete;
-        GenSudokuBoardPopulator(const GenSudokuBoardPopulator&) noexcept = default;
-        GenSudokuBoardPopulator(GenSudokuBoardPopulator&&) noexcept = default;
-        GenSudokuBoardPopulator &operator=(const GenSudokuBoardPopulator&) = delete;
+        GenSudokuBoardPopulator(const GenSudokuBoardPopulator&) = default;
+        GenSudokuBoardPopulator(GenSudokuBoardPopulator&&) = default;
+        GenSudokuBoardPopulator &operator=(const GenSudokuBoardPopulator&) = default;
 
         explicit GenSudokuBoardPopulator(const GenSudokuBoard<N> &partial_board):partial_board{partial_board} {
             initialize();
@@ -49,14 +49,14 @@ namespace vorpal::gensudoku {
          * Generate a random board from the partial board this class was initialized it.
          * @return a random board
          */
-        std::unique_ptr<stochastic::Candidate> generate() noexcept override {
+        std::unique_ptr<GenSudokuBoard<N>> generate() noexcept override {
             // For each row, shuffle the missing entries and distribute them amongst the empty positions.
             auto board = std::make_unique<GenSudokuBoard<N>>(partial_board);
 
             #pragma omp parallel for shared(board)
             for (size_t row = 0; row < NN; ++row)
                 fillRow(board, row);
-            return std::move(board);
+            return board;
         }
 
         /**
@@ -69,11 +69,11 @@ namespace vorpal::gensudoku {
          * @param originalBoard the original board
          * @return the board with the row mutated
          */
-        std::unique_ptr<stochastic::Candidate> mutate(const GenSudokuBoard<N> &original_board) noexcept override {
-            auto board = std::make_unique<GenSudokuBoard<N>>(original_board);
+        std::unique_ptr<GenSudokuBoard<N>> mutate(const std::unique_ptr<GenSudokuBoard<N>> &original_board) noexcept override {
+            auto board = std::make_unique<GenSudokuBoard<N>>(*original_board);
 
             // Select a row at random and shuffle the candidates.
-            auto gen = stochastic::RNG::getGenerator();
+            auto &gen = stochastic::RNG::getGenerator();
             const size_t row = std::uniform_int_distribution<size_t>{0, NN - 1}(gen);
             fillRow(board, row);
 
@@ -89,7 +89,7 @@ namespace vorpal::gensudoku {
          */
         void fillRow(std::unique_ptr<GenSudokuBoard<N>> &board, size_t row) noexcept {
             // Shuffle the candidates for the row.
-            auto gen = stochastic::RNG::getGenerator();
+            auto &gen = stochastic::RNG::getGenerator();
 
             std::vector<size_t> entries = rowMissingEntries[row];
             std::shuffle(std::begin(entries), std::end(entries), gen);
@@ -99,8 +99,8 @@ namespace vorpal::gensudoku {
                 size_t pos = row * NN + rowEmptyPositions[row][col];
                 size_t val = entries[col];
 
-                //#pragma omp atomic write
-                board[pos] = entries[col];
+                #pragma omp atomic write
+                (*board)[pos] = entries[col];
             }
         }
 

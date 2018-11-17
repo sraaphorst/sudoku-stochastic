@@ -22,6 +22,8 @@
 #include "ConstMath.h"
 
 namespace vorpal::gensudoku {
+    template<size_t, size_t> class GenSudokuBoardPopulator;
+
     /**
      * A generic sudoku board of size parameter N, i.e. the board has:
      * 1. N^2 rows;
@@ -36,7 +38,7 @@ namespace vorpal::gensudoku {
     template<size_t N = 3,
             const auto NN = N * N,
             const auto BoardSize = NN * NN>
-    class GenSudokuBoard final: public stochastic::Candidate {
+    class GenSudokuBoard final: public stochastic::Candidate<GenSudokuBoard<N>> {
     public:
         /**
          * The contents of a board. We represent as a single flat array of length N^4 to simplify certain
@@ -172,11 +174,12 @@ namespace vorpal::gensudoku {
          * @param contents the contents to check
          */
         template<typename B>
-        constexpr static void checkContents(B &&contents) {
+        static void checkContents(B &&contents) {
             for (size_t i = 0; i < BoardSize; ++i)
                 if (contents[i] > NN)
-                    throw std::invalid_argument(boost::format("illegal digit at position (%1%,%2$): %3%")
-                    % (i / 9) % (i % 9) % contents[i]);
+//                    throw std::invalid_argument(boost::format("illegal digit at position (%1%,%2$): %3%")
+//                                                % (i / 9) % (i % 9) % contents[i]);
+                    throw std::invalid_argument("no");
         }
 
         /**
@@ -276,6 +279,8 @@ namespace vorpal::gensudoku {
             assert(griderrors < NN);
             return rowerrors + colerrors + griderrors;
         }
+
+        friend class GenSudokuBoardPopulator<N, NN>;
     };
 
     using SudokuBoard = GenSudokuBoard<>;

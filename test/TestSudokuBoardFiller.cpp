@@ -8,10 +8,10 @@
 
 #include <bitset>
 
-#include <SudokuBoard.h>
-#include <SudokuBoardFiller.h>
+#include <GenSudokuBoard.h>
+#include <GenSudokuBoardPopulator.h>
 
-using namespace sudoku_stochastic;
+using namespace vorpal::gensudoku;
 
 TEST_CASE("Create a board where every row is a permutation") {
     SudokuBoard b{"100089457"
@@ -24,10 +24,10 @@ TEST_CASE("Create a board where every row is a permutation") {
                   "007008095"
                   "060090300"};
     REQUIRE(!b.isFull());
-    SudokuBoardFiller filler{b};
+    SudokuBoardPopulator filler{b};
 
     for (int bnum = 0; bnum < 10'000; ++bnum) {
-        const auto board = filler.generateRandomBoard();
+        const auto board = filler.generate();
 
         // Check each row.
         for (size_t row = 0; row < 9; ++row) {
@@ -38,9 +38,9 @@ TEST_CASE("Create a board where every row is a permutation") {
 
             for (size_t col = 0; col < 9; ++col) {
                 size_t pos = 9 * row + col;
-                if (board[pos] != 0) {
+                if ((*board)[pos] != 0) {
                     positions[col] = true;
-                    size_t entry = board[pos];
+                    size_t entry = (*board)[pos];
                     entries[entry] = true;
                 }
             }

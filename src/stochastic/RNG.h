@@ -17,26 +17,16 @@ namespace vorpal::stochastic {
      */
     class RNG {
     private:
-        static std::unique_ptr<std::random_device> rd;
         static std::unique_ptr<std::mt19937> gen;
 
     public:
         RNG() = delete;
 
         static auto &getGenerator() noexcept {
-            static std::mutex rd_mutex, gen_mutex;
-
-            // Wrap these in mutexes so that we only write to the variables exactly once.
-            {
-                std::lock_guard<std::mutex> guard{gen_mutex};
-                if (!rd)
-                    rd = std::make_unique<std::random_device>();
-            }
-            {
-                std::lock_guard<std::mutex> guard(gen_mutex);
-                if (!gen)
-                    gen = std::make_unique<std::mt19937>((*rd)());
-            }
+            static std::mutex gen_mutex;
+            std::lock_guard<std::mutex> guard{gen_mutex};
+            if (!gen)
+                gen = std::make_unique<std::mt19937>(std::random_device{}());
             return *gen;
         }
     };
