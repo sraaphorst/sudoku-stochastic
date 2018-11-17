@@ -58,7 +58,7 @@ namespace vorpal::gensudoku {
             // For each row, shuffle the missing entries and distribute them amongst the empty positions.
             auto board = std::make_unique<GenSudokuBoard<N>>(partial_board);
 
-            //#pragma omp parallel for shared(board)
+            #pragma omp parallel for shared(board)
             for (size_t row = 0; row < NN; ++row)
                 fillRow(board, row);
             return board;
@@ -138,12 +138,12 @@ namespace vorpal::gensudoku {
             std::vector<size_t> entries = rowMissingEntries[row];
             std::shuffle(std::begin(entries), std::end(entries), gen);
 
-            //#pragma omp parallel for shared(board, entries, gen)
+            #pragma omp parallel for shared(board, entries, gen)
             for (size_t col = 0; col < entries.size(); ++col) {
                 size_t pos = row * NN + rowEmptyPositions[row][col];
                 size_t val = entries[col];
 
-                //#pragma omp atomic write
+                #pragma omp atomic write
                 (*board)[pos] = entries[col];
             }
         }

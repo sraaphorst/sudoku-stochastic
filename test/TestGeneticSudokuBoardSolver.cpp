@@ -30,7 +30,7 @@ TEST_CASE("Solve a simple sudoku puzzle") {
     options.max_generations = 100;
     options.mutation_probability = 0.75;
     options.populator = std::make_unique<SudokuBoardPopulator>(board);
-    options.population_size = 5000;
+    options.population_size = 2000;
 
     const auto &sol = solver::run(options);
     std::cout << "Best solution found has fitness " << sol->fitness() << ":\n";
