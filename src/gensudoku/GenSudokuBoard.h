@@ -33,13 +33,15 @@ namespace vorpal::gensudoku {
      *
      * Note that we don't worry about here, as we want to use OpenMP, which is not compatible.
      *
+     * Note that fitness for Sudoku puzzles is discrete, so we use size_t instead of double.
      * @tparam N the size parameter
      */
     template<size_t N = 3,
             const auto NN = N * N,
             const auto BoardSize = NN * NN>
-    class GenSudokuBoard final: public stochastic::Candidate<GenSudokuBoard<N>> {
+    class GenSudokuBoard final: public stochastic::Candidate<GenSudokuBoard<N>, size_t> {
     public:
+        constexpr static auto PerfectFitness = 3 * BoardSize * (NN - 1);
         /**
          * The contents of a board. We represent as a single flat array of length N^4 to simplify certain
          * algorithms and checks.
@@ -163,7 +165,7 @@ namespace vorpal::gensudoku {
          * @return maxerrors - errors
          */
         size_t fitness() const override {
-            return 3 * BoardSize * (NN - 1) - findNumberOfErrors();
+            return PerfectFitness - findNumberOfErrors();
         }
 
     private:

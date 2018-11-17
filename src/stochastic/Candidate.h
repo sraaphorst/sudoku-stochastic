@@ -10,8 +10,8 @@ namespace vorpal::stochastic {
     /**
      * Abstract superclass representing a member of the population under question.
      */
-    template<typename T>
+    template<typename T, typename Fitness = double>
     struct Candidate {
-        virtual size_t fitness() const = 0;
+        virtual Fitness fitness() const = 0;
     };
 }

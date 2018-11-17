@@ -15,15 +15,27 @@ namespace vorpal::stochastic {
     template<typename T>
     class Populator {
     public:
+        using pointer_type = std::unique_ptr<T>;
+
         /**
          * Create a random Candidate from the population.
+         * @return the random candidate
          */
-        virtual std::unique_ptr<T> generate() noexcept = 0;
+        virtual pointer_type generate() noexcept = 0;
 
         /**
          * Given a Candidate, perform a mutation operation on it.
          * @param ptr the candidate to mutate
+         * @return the mutated candidate
          */
-        virtual std::unique_ptr<T> mutate(const std::unique_ptr<T> &ptr) noexcept = 0;
+        virtual pointer_type mutate(const pointer_type &ptr) noexcept = 0;
+
+        /**
+         * Given two parents, crossover-breed them together to produce a set of two offspring.
+         * @param p0 first parent
+         * @param p1 second parent
+         * @return the two offspring
+         */
+        virtual std::pair<pointer_type, pointer_type> crossover(const pointer_type &p0, const pointer_type &p1) noexcept = 0;
     };
 }

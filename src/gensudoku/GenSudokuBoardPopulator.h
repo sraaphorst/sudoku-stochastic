@@ -31,6 +31,8 @@ namespace vorpal::gensudoku {
         std::vector<std::vector<size_t>> rowMissingEntries;
 
     public:
+        using pointer_type = std::unique_ptr<GenSudokuBoard<N>>;
+
         // A collection of static methods.
         GenSudokuBoardPopulator() = delete;
         GenSudokuBoardPopulator(const GenSudokuBoardPopulator&) = default;
@@ -49,7 +51,7 @@ namespace vorpal::gensudoku {
          * Generate a random board from the partial board this class was initialized it.
          * @return a random board
          */
-        std::unique_ptr<GenSudokuBoard<N>> generate() noexcept override {
+        pointer_type generate() noexcept override {
             // For each row, shuffle the missing entries and distribute them amongst the empty positions.
             auto board = std::make_unique<GenSudokuBoard<N>>(partial_board);
 
@@ -69,7 +71,8 @@ namespace vorpal::gensudoku {
          * @param originalBoard the original board
          * @return the board with the row mutated
          */
-        std::unique_ptr<GenSudokuBoard<N>> mutate(const std::unique_ptr<GenSudokuBoard<N>> &original_board) noexcept override {
+        pointer_type mutate(const pointer_type &original_board)
+                    noexcept override {
             auto board = std::make_unique<GenSudokuBoard<N>>(*original_board);
 
             // Select a row at random and shuffle the candidates.
@@ -77,7 +80,36 @@ namespace vorpal::gensudoku {
             const size_t row = std::uniform_int_distribution<size_t>{0, NN - 1}(gen);
             fillRow(board, row);
 
-            return std::move(board);
+            return board;
+        }
+
+        /**
+         * Breed two parent solutions using uniform crossover to produce two child solutions.
+         * @param p0 first parent
+         * @param p1 second parent
+         * @return two children from the crossover breeding.
+         */
+        std::pair<pointer_type, pointer_type> crossover(const pointer_type &p0, const pointer_type &p1) noexcept override {
+            // For each of the children, for each row, we do a "crossover" where one child takes the row of one parent
+            // and the other child the row of the other parent.
+            auto c0 = std::make_unique<GenSudokuBoard<N>>();
+            auto c1 = std::make_unique<GenSudokuBoard<N>>();
+
+            // Iterate over the rows and assign them to the children.
+            auto &gen = stochastic::RNG::getGenerator();
+            std::uniform_int_distribution distribution{0, 1};
+
+            for (int i = 0; i < NN; ++i) {
+                if (distribution(gen) == 0) {
+                    c0->contents[i] = p0->contents[i];
+                    c1->contents[i] = p1->contents[i];
+                } else {
+                    c0->contents[i] = p1->contents[i];
+                    c1->contents[i] = p0->contents[i];
+                }
+            }
+
+            return {std::move(c0), std::move(c1)};
         }
 
     private:

@@ -36,8 +36,8 @@ TEST_CASE("Choose a population of size k") {
 
     for (int i = 0; i < 10; ++i) {
         std::cerr << "Picking... ";
-        const auto candidate = tournamentSelection(5, std::begin(sudokus), std::end(sudokus),
-                [](const auto &s) { return s->fitness(); });
+        const auto candidate = tournamentSelection(5, std::begin(sudokus), std::end(sudokus));
+//                [](const auto &s) { return s->fitness(); });
         std::cerr << "Candidate " << i << " has fitness " << (*candidate)->fitness() << '\n';
     }
 }

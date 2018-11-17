@@ -26,6 +26,7 @@ TEST_CASE("Test completed board") {
     SudokuBoard b{"126389457738425169549617832374852916892176543651943728983561274417238695265794381"};
     REQUIRE(b.isFull());
     REQUIRE(b.isDone());
+    REQUIRE(b.fitness() == SudokuBoard::PerfectFitness);
 }
 
 TEST_CASE("Test error counting") {
