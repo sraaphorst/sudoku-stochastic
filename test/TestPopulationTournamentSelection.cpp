@@ -28,7 +28,7 @@ TEST_CASE("Choose a population of size k") {
                   "007008095"
                   "060090300"};
     REQUIRE(!b.isFull());
-    
+
     SudokuBoardPopulator filler{b};
     std::vector<std::unique_ptr<SudokuBoard>> sudokus{50};
     for (int i = 0; i < 50; ++i)

@@ -22,6 +22,13 @@ namespace vorpal::stochastic {
     public:
         RNG() = delete;
 
+        /**
+         * IMPORTANT: an auto REFERENCE must be taken from this function.
+         * If the return value is not a reference, it will make a copy of gen and thus will display the same results
+         * repeatedly since gen will never change.
+         *
+         * auto &gen = RNG::getGenerator();
+         */
         static auto &getGenerator() noexcept {
             static std::mutex gen_mutex;
             std::lock_guard<std::mutex> guard{gen_mutex};
