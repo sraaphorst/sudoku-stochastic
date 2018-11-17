@@ -24,7 +24,7 @@ TEST_CASE("Solve a simple sudoku puzzle") {
     solver::Options options;
     //options.selector = std::make_unique<RandomSelector<SudokuBoard>>();
     //options.selector = std::make_unique<RouletteSelector<SudokuBoard>>();
-    options.selector = std::make_unique<KTournamentSelector<SudokuBoard>>(5);
+    options.selector = std::make_unique<KTournamentSelector<SudokuBoard>>(3);
     options.crossover_probability = 0.8;
     options.fitness_success_threshold = SudokuBoard::PerfectFitness;
     options.max_generations = 100;
@@ -39,4 +39,6 @@ TEST_CASE("Solve a simple sudoku puzzle") {
             std::cerr << (*sol)[row * 9 + col];
         std::cerr << '\n';
     }
+    REQUIRE(sol->isFull());
+    REQUIRE(sol->fitness() <= SudokuBoard::PerfectFitness);
 }

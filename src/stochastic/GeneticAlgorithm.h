@@ -36,6 +36,7 @@ namespace vorpal::stochastic {
             double crossover_probability;
             size_t max_generations;
             Fitness fitness_success_threshold;
+            Fitness fitness_death_threshold;
         };
 
         template<typename Opts>
@@ -63,12 +64,14 @@ namespace vorpal::stochastic {
 
             // *** Begin a new generation ***
             for (size_t generation = 0; generation < options.max_generations - 1; ++generation) {
-                std::cerr<< "Generation "<< generation<< '\n';
+                std::cerr << "Generation " << generation << '\n';
                 // Create the candidates for the next generation.
                 std::vector<pointer_type> nextGeneration{options.population_size};
 
+                /** Most of the work that can be easily parallelized is here, and propagates forward. **/
+                const size_t maxiters = options.population_size/2;
                 #pragma omp parallel for default(shared)
-                for (size_t i = 0; i < options.population_size; i += 2) {
+                for (size_t i = 0; i < options.population_size/2; ++i) {
                     // Crossover if probability dictates.
                     if (probabilityGenerator(gen) < options.crossover_probability) {
                         const size_t p0Idx = options.selector->select(prevGeneration);
@@ -77,15 +80,21 @@ namespace vorpal::stochastic {
                         const auto &p1 = prevGeneration[p1Idx];
 
                         auto [c0, c1] = options.populator->crossover(p0, p1);
-                        nextGeneration[i] = (probabilityGenerator(gen) < options.mutation_probability) ?
+                        nextGeneration[2*i] = (probabilityGenerator(gen) < options.mutation_probability) ?
                                 std::move(options.populator->mutate(c0)) : std::move(c0);
-                        nextGeneration[i+1] = (probabilityGenerator(gen) < options.mutation_probability) ?
+                        nextGeneration[2*i+1] = (probabilityGenerator(gen) < options.mutation_probability) ?
                                             std::move(options.populator->mutate(c1)) : std::move(c1);
                     } else {
-                        nextGeneration[i] = std::move(options.populator->survive(prevGeneration[i]));
-                        nextGeneration[i+1] = std::move(options.populator->survive(prevGeneration[i+1]));
+                        nextGeneration[2*i] = std::move(options.populator->survive(prevGeneration[2*i]));
+                        nextGeneration[2*i+1] = std::move(options.populator->survive(prevGeneration[2*i+1]));
                     }
                 }
+
+                // Kill off poor Sudoku and produce new ones.
+                #pragma omp parallel for shared(nextGeneration)
+                for (size_t i = 0; i < options.population_size; ++i)
+                    if (nextGeneration[i]->fitness() <= options.fitness_death_threshold)
+                        nextGeneration[i] = std::move(options.populator->generate());
 
                 // Now get the fittest solution and see if it is fit enough.
                 const auto &fittest = *std::max_element(std::cbegin(nextGeneration), std::cend(nextGeneration),

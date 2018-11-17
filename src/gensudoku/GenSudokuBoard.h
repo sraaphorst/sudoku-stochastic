@@ -6,8 +6,6 @@
 
 #pragma once
 
-#include <omp.h>
-
 #include <array>
 #include <iterator>
 #include <iostream>
@@ -124,7 +122,6 @@ namespace vorpal::gensudoku {
         bool hasValidEntries() const noexcept {
              bool flag = true;
 
-             //#pragma omp parallel for shared(flag)
              for (size_t i = 0; i < BoardSize; ++i) {
                  if (!flag) continue;
                  if (contents[i] > NN)
@@ -149,7 +146,6 @@ namespace vorpal::gensudoku {
         size_t findNumberOfErrors() const noexcept {
             size_t errorCount = 0;
 
-            //#pragma omp parallel for shared(errorCount, contents)
             for (size_t pos = 0; pos < BoardSize; ++pos) {
                 size_t errors = findNumberOfErrors(pos);
                 if (errors > 0) {
@@ -245,25 +241,18 @@ namespace vorpal::gensudoku {
             const auto col = posToCol(pos);
 
             // pos falls into the grid (xgrid, ygrid).
-            const auto gridXY = posToGrid(pos);
-            const auto gridX = gridXY.first;
-            const auto gridY = gridXY.second;
+            const auto [gridX, gridY] = posToGrid(pos);
 
-            // We can't bind gridXY and then pass it in.
-            // Using OpenMP here dramatically slows down the execution speed. I'm not sure why.
-            //#pragma omp for
             for (size_t i = 0; i < NN; ++i) {
                 // Handle row errors.
                 const size_t rowpos = row * NN + i;
                 if (rowpos < pos && contents[rowpos] == digit) {
-                    //#pragma omp atomic update
                     ++rowerrors;
                 }
 
                 // Handle column errors.
                 const size_t colpos = i * NN + col;
                 if (colpos < pos && contents[colpos] == digit) {
-                    //#pragma omp atomic update
                     ++colerrors;
                 }
 
@@ -272,7 +261,6 @@ namespace vorpal::gensudoku {
                 const size_t gridcol = i % N;
                 const size_t gridpos = NN * (N * gridX + gridrow) + N * gridY + gridcol;
                 if (gridpos < pos && contents[gridpos] == digit) {
-                    //#pragma omp atomic update
                     ++griderrors;
                 }
             }
