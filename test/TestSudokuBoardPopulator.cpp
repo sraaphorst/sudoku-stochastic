@@ -1,5 +1,5 @@
 /**
- * TestSudokuBoardFiller.cpp
+ * TestSudokuBoardPopulator.cpp
  *
  * By Sebastian Raaphorst, 2018.
  */

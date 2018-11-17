@@ -32,7 +32,6 @@ namespace vorpal::stochastic {
             std::unique_ptr<Selector<T>> selector;
             std::unique_ptr<Populator<T>> populator;
             size_t population_size;
-            size_t min_populator_size;
             double mutation_probability;
             double crossover_probability;
             size_t max_generations;
@@ -41,9 +40,8 @@ namespace vorpal::stochastic {
 
         template<typename Opts>
         static pointer_type run(Opts&& options) {
-            // Force population_size to be even for convenience, and ensure it is big enough for selection.
+            // Force population_size to be even for convenience.
             assert(options.population_size % 2 == 0);
-            assert(options.min_populator_size <= options.population_size);
 
             auto &gen = RNG::getGenerator();
             std::uniform_real_distribution<double> probabilityGenerator;
@@ -65,6 +63,7 @@ namespace vorpal::stochastic {
 
             // *** Begin a new generation ***
             for (size_t generation = 0; generation < options.max_generations - 1; ++generation) {
+                std::cerr<< "Generation "<< generation<< '\n';
                 // Create the candidates for the next generation.
                 std::vector<pointer_type> nextGeneration{};
 

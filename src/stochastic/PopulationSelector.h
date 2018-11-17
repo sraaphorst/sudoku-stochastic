@@ -26,7 +26,7 @@ namespace vorpal::stochastic {
     struct Selector {
         Selector() = default;
         virtual ~Selector() = default;
-        virtual size_t select(const std::vector<std::unique_ptr<T>>&) = 0;
+        virtual size_t select(const std::vector<std::unique_ptr<T>>&) const noexcept = 0;
     };
 
     /**
@@ -36,7 +36,7 @@ namespace vorpal::stochastic {
     struct RandomSelector final: Selector<T> {
         RandomSelector() = default;
         ~RandomSelector() = default;
-        size_t select(const std::vector<std::unique_ptr<T>> &ps) override {
+        size_t select(const std::vector<std::unique_ptr<T>> &ps) const noexcept override {
             const size_t distance = ps.size();
             std::uniform_int_distribution<uint64_t> distribution(0, distance - 1);
             const size_t selection = distribution(RNG::getGenerator());
@@ -57,7 +57,7 @@ namespace vorpal::stochastic {
         }
         ~KTournamentSelector() = default;
 
-        size_t select(const std::vector<std::unique_ptr<T>> &ps) override {
+        size_t select(const std::vector<std::unique_ptr<T>> &ps) const noexcept override {
             assert(k <= ps.size());
 
             std::uniform_int_distribution<uint64_t> distribution(0, ps.size() - 1);
@@ -81,11 +81,11 @@ namespace vorpal::stochastic {
      * Perform a roulette selection, i.e. allot everyone a probability commensurate with their fitness.
      */
      template<typename T>
-     struct RouletteSelection: Selector<T> {
-         RouletteSelection() = default;
-         ~RouletteSelection() = default;
+     struct RouletteSelector final: Selector<T> {
+         RouletteSelector() = default;
+         ~RouletteSelector() = default;
 
-         size_t select(const std::vector<std::unique_ptr<T>> &ps) override {
+         size_t select(const std::vector<std::unique_ptr<T>> &ps) const noexcept override {
              // Tally the fitnesses.
             // We could use std::transform_reduce here, but it seems to only be in llvm and not gcc.
             uint64_t tally = 0;

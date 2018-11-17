@@ -23,15 +23,14 @@ TEST_CASE("Solve a simple sudoku puzzle") {
     using solver = GeneticAlgorithm<SudokuBoard, size_t>;
     solver::Options options;
     //options.selector = std::make_unique<RandomSelector<SudokuBoard>>();
-    //options.selector = std::make_unique<KTournamentSelector<SudokuBoard>>(5);
-    options.selector = std::make_unique<RouletteSelection<SudokuBoard>>();
+    //options.selector = std::make_unique<RouletteSelector<SudokuBoard>>();
+    options.selector = std::make_unique<KTournamentSelector<SudokuBoard>>(5);
     options.crossover_probability = 0.8;
     options.fitness_success_threshold = SudokuBoard::PerfectFitness;
-    options.max_generations = 10;
+    options.max_generations = 100;
     options.mutation_probability = 0.75;
     options.populator = std::make_unique<SudokuBoardPopulator>(board);
-    options.population_size = 50;
-    options.min_populator_size = 3;
+    options.population_size = 5000;
 
     const auto &sol = solver::run(options);
     std::cout << "Best solution found has fitness " << sol->fitness() << ":\n";
