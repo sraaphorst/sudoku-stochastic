@@ -13,7 +13,12 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 find_package(Boost 1.67 COMPONENTS serialization REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
-include_directories(${PROJECT_SOURCE_DIR}/src)
+include_directories(
+        ${PROJECT_SOURCE_DIR}/src
+        ${PROJECT_SOURCE_DIR}/src/stochastic
+        ${PROJECT_SOURCE_DIR}/src/gensudoku
+)
+
 
 find_package(OpenMP REQUIRED)
 if (OPENMP_FOUND)

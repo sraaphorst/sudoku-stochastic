@@ -1,5 +1,5 @@
 #include <iostream>
-#include <GenSudokuBoard.h>
+#include <sudoku/GenSudokuBoard.h>
 
 int main() {
     std::cout << "Hello, World!" << std::endl;

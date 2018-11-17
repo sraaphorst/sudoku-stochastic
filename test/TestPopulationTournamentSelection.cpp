@@ -8,8 +8,9 @@
 
 #include <array>
 #include <functional>
+#include <iostream>
 
-#include "PopulationSelector.h"
+#include "genetic/PopulationSelector.h"
 #include "SudokuBoard.h"
 #include "SudokuBoardFiller.h"
 
@@ -26,13 +27,21 @@ TEST_CASE("Choose a population of size k") {
                   "007008095"
                   "060090300"};
     REQUIRE(!b.isFull());
+
+    std::cerr << "1\n";
     SudokuBoardFiller filler{b};
-
+    std::cerr << "2\n";
     std::vector<SudokuBoard> sudokus{50};
-    for (int i = 0; i < 50; ++i)
+    for (int i = 0; i < 50; ++i) {
+        std::cerr << "\t" << i << '\n';
         sudokus[i] = filler.generateRandomBoard();
-
-    genetic::tournamentSelection(5, std::begin(sudokus), std::end(sudokus),
-            [](const auto &s) { return s.fitness(); });
-
+        std::cerr << "\t" << i << '\n';
+    }
+    std::cerr << "3\n";
+    for (int i = 00; i < 10; ++i) {
+        std::cerr << "Picking...\n";
+        const auto candidate = genetic::tournamentSelection(5, std::begin(sudokus), std::end(sudokus),
+                                                             [](const auto &s) { return s.fitness(); });
+        std::cerr << "Candidate " << i << " has fitness " << candidate->fitness() << '\n';
+    }
 }

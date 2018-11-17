@@ -1,21 +1,18 @@
 /**
- * constmath.h
+ * ConstMath.cpp
  *
  * By Sebastian Raaphorst, 2018.
  */
 
-#pragma once
-
-#include <cassert>
 #include <cstddef>
 
-namespace sudoku_stochastic::math {
-    /// constexpr toupper
+#include "ConstMath.h"
+
+namespace vorpal::gensudoku {
     constexpr unsigned char cToUpper(unsigned char c) {
         return (c >= 'a' && c <= 'z') ? c - 'a' + 'A' : c;
     }
 
-    /// Convert from a char in base 36 (0-9, A-Z).
     constexpr size_t fromBase36(unsigned char c) {
         const char uc = cToUpper(c);
         if (uc >= '0' && uc <= '9')
@@ -26,7 +23,6 @@ namespace sudoku_stochastic::math {
             return static_cast<size_t>(uc);
     }
 
-    /// Convert from a base 36 digit to a char.
     constexpr unsigned char toBase36(size_t d) {
         assert(d >= 0 && d < 36);
         if (d < 10)

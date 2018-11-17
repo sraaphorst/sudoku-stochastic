@@ -18,9 +18,10 @@
 
 #include <boost/format.hpp>
 
-#include "constmath.h"
+#include "Candidate.h"
+#include "ConstMath.h"
 
-namespace sudoku_stochastic {
+namespace vorpal::gensudoku {
     /**
      * A generic sudoku board of size parameter N, i.e. the board has:
      * 1. N^2 rows;
@@ -28,14 +29,14 @@ namespace sudoku_stochastic {
      * 3. N x N subgrids of size N x N.
      * 3. N^2 symbols [1,N^2], and a reserved symbol, 0, that indicates the board cell is not yet fixed.
      *
-     * Note that we don't worry about constexpr here, as we want to use OpenMP, which is not compatible.
+     * Note that we don't worry about here, as we want to use OpenMP, which is not compatible.
      *
      * @tparam N the size parameter
      */
     template<size_t N = 3,
             const auto NN = N * N,
             const auto BoardSize = NN * NN>
-    class GenSudokuBoard final {
+    class GenSudokuBoard final: public stochastic::Candidate {
     public:
         /**
          * The contents of a board. We represent as a single flat array of length N^4 to simplify certain
@@ -51,20 +52,20 @@ namespace sudoku_stochastic {
         constexpr GenSudokuBoard(const GenSudokuBoard&) noexcept = default;
         constexpr GenSudokuBoard(GenSudokuBoard&&) noexcept = default;
 
-        explicit constexpr GenSudokuBoard(const std::string_view &sv) {
+        constexpr explicit GenSudokuBoard(const std::string_view &sv) {
             if (sv.size() != BoardSize)
                 throw std::invalid_argument("Sudoku board must be initialized with flat string of appropriate length");
 
             for (int i = 0; i < BoardSize; ++i)
-                contents[i] = math::fromBase36(sv[i]);
+                contents[i] = fromBase36(sv[i]);
         }
 
-        explicit constexpr GenSudokuBoard(const board_contents &c) {
+        constexpr explicit GenSudokuBoard(const board_contents &c) {
             checkContents(c);
             contents = c;
         }
 
-        explicit constexpr GenSudokuBoard(board_contents &&c) {
+        constexpr explicit GenSudokuBoard(board_contents &&c) {
             checkContents(c);
             contents = std::move(c);
         }
@@ -86,7 +87,7 @@ namespace sudoku_stochastic {
             return contents[row * NN + col];
         }
 
-        size_t &operator[](const std::pair<size_t, size_t> &pos) noexcept {
+        constexpr size_t &operator[](const std::pair<size_t, size_t> &pos) noexcept {
             const auto [row, col] = pos;
             assert(row < NN && col < NN);
             return contents[row * NN + col];
@@ -97,7 +98,7 @@ namespace sudoku_stochastic {
             return contents[pos];
         }
 
-        size_t &operator[](size_t pos) noexcept {
+        constexpr size_t &operator[](size_t pos) noexcept {
             assert(pos < BoardSize);
             return contents[pos];
         }
@@ -115,7 +116,7 @@ namespace sudoku_stochastic {
          * We also allow zero.
          * @return true if the board has valid entries, and false otherwise.
          */
-         bool hasValidEntries() const noexcept {
+        bool hasValidEntries() const noexcept {
              bool flag = true;
 
              #pragma omp parallel for shared(flag)
@@ -131,7 +132,7 @@ namespace sudoku_stochastic {
         /**
          * Determine if a board is done. This will only be the case when the board is complete and has no errors.
          */
-        bool isDone() const noexcept {
+        constexpr bool isDone() const noexcept {
             return isFull() && hasValidEntries() && findNumberOfErrors() == 0;
         }
 
@@ -159,7 +160,7 @@ namespace sudoku_stochastic {
          * Return the fitness of the board, i.e. the maxinum number of possible errors minus the number of errors.
          * @return maxerrors - errors
          */
-        size_t fitness() const {
+        size_t fitness() const override {
             return 3 * BoardSize * (NN - 1) - findNumberOfErrors();
         }
 
@@ -276,4 +277,6 @@ namespace sudoku_stochastic {
             return rowerrors + colerrors + griderrors;
         }
     };
+
+    using SudokuBoard = GenSudokuBoard<>;
 }

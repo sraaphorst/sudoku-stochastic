@@ -13,17 +13,17 @@
 #include <tuple>
 #include <unordered_set>
 
-#include "SudokuBoard.h"
+#include "GenSudokuBoard.h"
 
-using namespace sudoku_stochastic;
+using namespace vorpal::gensudoku;
 
 TEST_CASE("Create from string") {
-    constexpr SudokuBoard b{"100089457738000000040010000004050906000000000000000728080001000007008095060090300"};
+    SudokuBoard b{"100089457738000000040010000004050906000000000000000728080001000007008095060090300"};
     REQUIRE(!b.isFull());
 }
 
 TEST_CASE("Test completed board") {
-    constexpr SudokuBoard b{"126389457738425169549617832374852916892176543651943728983561274417238695265794381"};
+    SudokuBoard b{"126389457738425169549617832374852916892176543651943728983561274417238695265794381"};
     REQUIRE(b.isFull());
     REQUIRE(b.isDone());
 }
@@ -34,7 +34,7 @@ TEST_CASE("Test error counting") {
     // 3 errors: three 1s in col 0
     // 1 error:  two 1s in grid (0,0)
     // 1 error:  two 9s in grid (1,2)
-    constexpr SudokuBoard b{
+    SudokuBoard b{
             "102987459"
             "134652798"
             "785134260"
@@ -62,7 +62,7 @@ std::unordered_set<size_t> pairToPos(const std::set<std::pair<size_t, size_t>> &
 
 TEST_CASE("Test hasValidEntries") {
     // A base-17 board with valid entries.
-    constexpr GenSudokuBoard<4> b {
+    GenSudokuBoard<4> b {
         "123456789abcdefg"
         "23456789abcdefg1"
         "3456789abcdefg12"

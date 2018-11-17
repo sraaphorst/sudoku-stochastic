@@ -20,7 +20,7 @@
 #include "PopulationSelector.h"
 #include "RNG.h"
 
-namespace sudoku_stochastic::genetic {
+namespace vorpal::stochastic {
     /**
      * Perform a k-tournament selection, i.e. pick k population members randomly and return the most fit.
      * @return the most fit out of a k-sample
@@ -35,8 +35,6 @@ namespace sudoku_stochastic::genetic {
         // Thus, we simply keep trying to get k elements.
         std::uniform_int_distribution<uint64_t > distribution(0, total - 1);
         auto &gen = RNG::getGenerator();
-//        std::random_device rd;
-//        std::mt19937 gen(rd());
 
         std::set<size_t> indices{};
         while (indices.size() < k)
@@ -67,10 +65,8 @@ namespace sudoku_stochastic::genetic {
         // Tally all the fitnesses.
         const auto total = std::transform_reduce(begin, end, uint64_t{0}, f, std::plus<>());
 
-        std::random_device rd;
-        std::mt19937 gen(rd());
         std::uniform_int_distribution<uint64_t > distribution(0, total);
-        uint64_t value = distribution(rd);
+        uint64_t value = distribution(RNG::getGenerator());
 
         // Find the selection.
         while (begin != end) {
@@ -90,9 +86,7 @@ namespace sudoku_stochastic::genetic {
      */
     template<typename Iter, typename OutIter>
     Iter randomSelection(size_t k, Iter begin, Iter end) {
-        std::random_device rd;
-        std::mt19937 gen(rd());
         std::uniform_int_distribution<uint64_t > distribution(0, static_cast<unsigned long long>(std::distance(end, begin)));
-        return begin + distribution(gen);
+        return begin + distribution(RNG::getGenerator());
     }
 }
