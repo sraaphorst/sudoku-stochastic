@@ -22,7 +22,9 @@ TEST_CASE("Solve a simple sudoku puzzle") {
 
     using solver = GeneticAlgorithm<SudokuBoard, size_t>;
     solver::Options options;
-    options.selector = std::make_unique<RandomSelector<SudokuBoard>>();
+    //options.selector = std::make_unique<RandomSelector<SudokuBoard>>();
+    //options.selector = std::make_unique<KTournamentSelector<SudokuBoard>>(5);
+    options.selector = std::make_unique<RouletteSelection<SudokuBoard>>();
     options.crossover_probability = 0.8;
     options.fitness_success_threshold = SudokuBoard::PerfectFitness;
     options.max_generations = 10;

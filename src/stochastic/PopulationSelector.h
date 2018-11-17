@@ -7,11 +7,8 @@
 #pragma once
 
 #include <algorithm>
-#include <array>
 #include <cassert>
-#include <functional>
 #include <iterator>
-#include <numeric>
 #include <random>
 #include <set>
 #include <vector>
@@ -20,6 +17,11 @@
 #include "RNG.h"
 
 namespace vorpal::stochastic {
+    /**
+     * A selector takes a generation of candidates and chooses one from the generation based on certain
+     * criteria. This is the superclass of all selectors.
+     * @tparam T the type represented in the container
+     */
     template<typename T>
     struct Selector {
         Selector() = default;
@@ -27,93 +29,81 @@ namespace vorpal::stochastic {
         virtual size_t select(const std::vector<std::unique_ptr<T>>&) = 0;
     };
 
+    /**
+     * A simple selector that randomly picks an element.
+     */
     template<typename T>
     struct RandomSelector final: Selector<T> {
         RandomSelector() = default;
         ~RandomSelector() = default;
-        size_t select(const std::vector<std::unique_ptr<T>> &ps) {
+        size_t select(const std::vector<std::unique_ptr<T>> &ps) override {
             const size_t distance = ps.size();
             std::uniform_int_distribution<uint64_t> distribution(0, distance - 1);
             const size_t selection = distribution(RNG::getGenerator());
             return selection;
         }
     };
-//    /**
-//     * Perform a k-tournament selection, i.e. pick k population members randomly and return the most fit.
-//     * @return the most fit out of a k-sample
-//     */
-//    struct KTournamentSelection {
-//        template<typename Iter>
-//        static Iter selection(size_t k, Iter begin, Iter end) {
-//            const auto total = static_cast<unsigned long long>(std::distance(begin, end));
-//            if (total < k)
-//                return end;
-//
-//            // This is irritatingly complicated because we want an Iter, and not its value type.
-//            // Thus, we simply keep trying to get k elements.
-//            std::uniform_int_distribution<uint64_t> distribution(0, total - 1);
-//            auto &gen = RNG::getGenerator();
-//
-//            std::set<size_t> indices{};
-//            while (indices.size() < k)
-//                indices.insert(distribution(gen));
-//
-//            auto idx = *std::max_element(std::cbegin(indices), std::cend(indices),
-//                                         [begin](const auto i1, const auto i2) {
-//                                             auto begin1 = begin;
-//                                             std::advance(begin1, i1);
-//                                             auto begin2 = begin;
-//                                             std::advance(begin2, i2);
-//                                             return (*begin1)->fitness() < (*begin2)->fitness();
-//                                         });
-//
-//            std::advance(begin, idx);
-//            return begin;
-//        }
-//    };
-//
-//    /**
-//     * Perform a roulette selection, i.e. allot everyoe a probability commensurate with their fitness.
-//     * @return a fitness weighted random choice
-//     */
-//    struct RouletteSelection {
-//        template<typename Iter>
-//        static Iter selection(size_t k, Iter begin, Iter end) {
-//            if (std::distance(end, begin) < k)
-//                return end;
-//
-//            // Tally all the fitnesses.
-//            const auto total = std::transform_reduce(begin, end, uint64_t{0},
-//                                                     [](const auto &a) { return (*a)->fitness(); }, std::plus<>());
-//
-//            std::uniform_int_distribution<uint64_t> distribution(0, total);
-//            uint64_t value = distribution(RNG::getGenerator());
-//
-//            // Find the selection.
-//            while (begin != end) {
-//                const auto currValue = f(begin);
-//                if (currValue <= value)
-//                    return begin;
-//                value -= currValue;
-//            }
-//
-//            // We should never get here.
-//            return end;
-//        }
-//    };
-//
-//    /**
-//     * Perform a completely random selection.
-//     * @return a random element
-//     */
-//     struct RandomSelection {
-//         template<typename Iter>
-//         static Iter selection(size_t k, Iter begin, Iter end) {
-//             const size_t distance = std::distance(begin, end);
-//             std::uniform_int_distribution<uint64_t> distribution(0, distance);
-//             const size_t offset = distribution(RNG::getGenerator());
-//             std::advance(begin, offset);
-//             return begin;
-//         }
-//     };
+
+    /**
+     * A k-tournament selector chooses k elements at random, evaluates their fitness, and returns the best.
+     */
+    template<typename T>
+    class KTournamentSelector final: public Selector<T> {
+        size_t k;
+
+    public:
+        explicit KTournamentSelector(size_t k): k{k} {
+            assert(k > 0);
+        }
+        ~KTournamentSelector() = default;
+
+        size_t select(const std::vector<std::unique_ptr<T>> &ps) override {
+            assert(k <= ps.size());
+
+            std::uniform_int_distribution<uint64_t> distribution(0, ps.size() - 1);
+            auto &gen = RNG::getGenerator();
+
+            // We need a set of k unique indices into ps.
+            // A shuffle would be a poor way to do this because the size of ps is likely to be much larger than k.
+            std::set<size_t> indices;
+            while (indices.size() < k) {
+                indices.insert(distribution(gen));
+            }
+
+            // Now determine the max element in indices with regards to fitness.
+            return *std::max_element(std::cbegin(indices), std::cend(indices),
+                    [&ps] (const auto idx1, const auto idx2) { return ps[idx1]->fitness() < ps[idx2]->fitness(); });
+        }
+    };
+
+
+    /**
+     * Perform a roulette selection, i.e. allot everyone a probability commensurate with their fitness.
+     */
+     template<typename T>
+     struct RouletteSelection: Selector<T> {
+         RouletteSelection() = default;
+         ~RouletteSelection() = default;
+
+         size_t select(const std::vector<std::unique_ptr<T>> &ps) override {
+             // Tally the fitnesses.
+            // We could use std::transform_reduce here, but it seems to only be in llvm and not gcc.
+            uint64_t tally = 0;
+            for (const auto &p: ps)
+                tally += p->fitness();
+
+             std::uniform_int_distribution<uint64_t> distribution(0, tally - 1);
+             uint64_t goal = distribution(RNG::getGenerator());
+
+             for (size_t i = 0; i < ps.size(); ++i) {
+                 const auto fitness = ps[i]->fitness();
+                 if (goal < fitness)
+                     return i;
+                 goal -= fitness;
+             }
+
+             // This point should never be reached.
+             return 0;
+         }
+     };
 }
