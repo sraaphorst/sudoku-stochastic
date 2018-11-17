@@ -67,9 +67,9 @@ namespace vorpal::stochastic {
             for (size_t generation = 0; generation < options.max_generations - 1; ++generation) {
                 std::cerr<< "Generation "<< generation<< '\n';
                 // Create the candidates for the next generation.
-                std::vector<pointer_type> nextGeneration{};
+                std::vector<pointer_type> nextGeneration{options.population_size};
 
-                //#pragma omp parallel for shared(prevGeneration, probabilityGenerator, gen)
+                #pragma omp parallel for shared(prevGeneration, nextGeneration, probabilityGenerator, gen)
                 for (int i = 0; i < options.population_size; i += 2) {
                     // Crossover if probability dictates.
                     if (probabilityGenerator(gen) < options.crossover_probability) {
@@ -81,22 +81,22 @@ namespace vorpal::stochastic {
                         auto [c0, c1] = options.populator->crossover(p0, p1);
                         if (probabilityGenerator(gen) < options.mutation_probability) {
                             auto m0 = options.populator->mutate(c0);
-                            nextGeneration.emplace_back(std::move(m0));
+                            nextGeneration[i] = std::move(m0);
                         } else {
-                            nextGeneration.emplace_back(std::move(c0));
+                            nextGeneration[i] = std::move(c0);
                         }
                         if (probabilityGenerator(gen) < options.mutation_probability) {
                             auto m1 = options.populator->mutate(c1);
-                            nextGeneration.emplace_back(std::move(m1));
+                            nextGeneration[i+1] = std::move(m1);
                         } else {
-                            nextGeneration.emplace_back(std::move(c1));
+                            nextGeneration[i+1] = std::move(c1);
                         }
 
                     } else {
                         auto d0 = options.populator->survive(prevGeneration[i]);
                         auto d1 = options.populator->survive(prevGeneration[i+1]);
-                        nextGeneration.emplace_back(std::move(d0));
-                        nextGeneration.emplace_back(std::move(d1));
+                        nextGeneration[i] = std::move(d0);
+                        nextGeneration[i+1] = std::move(d1);
                     }
                 }
 
