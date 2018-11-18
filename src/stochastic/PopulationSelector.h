@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cassert>
 #include <iterator>
+#include <memory>
 #include <random>
 #include <set>
 #include <vector>

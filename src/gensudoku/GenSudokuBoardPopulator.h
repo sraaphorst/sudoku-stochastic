@@ -12,7 +12,6 @@
 #include <tuple>
 #include <vector>
 
-#include "Candidate.h"
 #include "Populator.h"
 #include "GenSudokuBoard.h"
 #include "RNG.h"

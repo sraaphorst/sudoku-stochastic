@@ -7,7 +7,6 @@
 #include <catch.hpp>
 
 #include <array>
-#include <functional>
 #include <iostream>
 
 #include "PopulationSelector.h"

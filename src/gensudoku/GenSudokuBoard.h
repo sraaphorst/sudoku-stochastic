@@ -9,12 +9,8 @@
 #include <array>
 #include <bitset>
 #include <iterator>
-#include <iostream>
-#include <map>
-#include <mutex>
 #include <stdexcept>
 #include <string_view>
-#include <unordered_set>
 
 #include <boost/format.hpp>
 

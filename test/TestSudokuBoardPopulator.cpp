@@ -6,8 +6,6 @@
 
 #include <catch.hpp>
 
-#include <bitset>
-
 #include <GenSudokuBoard.h>
 #include <GenSudokuBoardPopulator.h>
 

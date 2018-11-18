@@ -6,13 +6,10 @@
 
 #include <catch.hpp>
 
-#include <memory>
-
 #include "GenSudokuBoard.h"
 #include "GenSudokuBoardPopulator.h"
 
 #include "GeneticAlgorithm.h"
-#include "PopulationSelector.h"
 
 using namespace vorpal::gensudoku;
 using namespace vorpal::stochastic;
