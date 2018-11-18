@@ -23,6 +23,7 @@ int main() {
         // Having this set to 0 made a huge difference in one trial.: 1904 - 1935 - 1936 - 1938
         //options.fitness_death_threshold = static_cast<size_t>(SudokuBoard::PerfectFitness * 0.98);
         options.fitness_death_factor = 0.9875;
+        //options.permissible_dead_rounds = 500'000;
         options.permissible_dead_rounds = 500'000;
 
         const auto &sol = solver::run(options);

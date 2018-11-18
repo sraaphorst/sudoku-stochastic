@@ -36,14 +36,14 @@ namespace vorpal::stochastic {
             std::unique_ptr<Populator<T>> populator = nullptr;
 
             // The  population size of each generation.
-            size_t population_size = 1000;
+            size_t population_size = 2000;
 
             // The maximum number of generations to run.
             // Default: as many as possible.
             uint64_t max_generations = UINT64_MAX;
 
             // The probability that two candidates will breed.
-            double crossover_probability = 0.3;
+            double crossover_probability = 0.4;
 
             // The selector that chooses who will be involved in cross over / breeding when it occurs.
             // The default is 2-tournament selection.
@@ -151,17 +151,21 @@ namespace vorpal::stochastic {
                         static_cast<Fitness>(options.fitness_death_factor * best->fitness()));
 
                 // Demise: is it time to euthanize?
-                //#pragma omp parallel for shared(nextGeneration)
+                #pragma omp parallel for
                 for (size_t i = 0; i < options.population_size; ++i)
                     if (deadRounds >= options.permissible_dead_rounds || nextGeneration[i]->fitness() <= kill_threshold)
                         nextGeneration[i] = std::move(options.populator->generate());
-                if (deadRounds >- options.permissible_dead_rounds)
+                if (deadRounds >= options.permissible_dead_rounds) {
+                    std::cerr << "Killed everything\n";
+                    #pragma omp atomic write
                     deadRounds = 0;
+                }
 
                 // Output if requested.
                 if (generation % options.output_rounds == 0)
                     std::cerr << "Generation: " << generation
                               << ", fittest: " << best->fitness()
+                              << ", dead rounds: " << deadRounds
                               << ", time elapsed: " << ((std::chrono::system_clock::now() - start).count() / 1e6) << "s"
                               << '\n';
 

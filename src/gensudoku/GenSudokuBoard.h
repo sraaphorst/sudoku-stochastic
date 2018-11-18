@@ -30,8 +30,6 @@ namespace vorpal::gensudoku {
      * 3. N x N subgrids of size N x N.
      * 3. N^2 symbols [1,N^2], and a reserved symbol, 0, that indicates the board cell is not yet fixed.
      *
-     * Note that we don't worry about here, as we want to use OpenMP, which is not compatible.
-     *
      * Note that fitness for Sudoku puzzles is discrete, so we use size_t instead of double.
      * @tparam N the size parameter
      */
