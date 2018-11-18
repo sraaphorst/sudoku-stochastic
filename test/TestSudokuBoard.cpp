@@ -30,35 +30,19 @@ TEST_CASE("Test completed board") {
 }
 
 TEST_CASE("Test error counting") {
-    // Errors in this board: 6
-    // 1 error:  two 9s in row 0
-    // 3 errors: three 1s in col 0
-    // 1 error:  two 1s in grid (0,0)
-    // 1 error:  two 9s in grid (1,2)
     SudokuBoard b{
-            "102987459"
-            "134652798"
-            "785134260"
-            "100000000"
-            "000000000"
-            "000000000"
-            "000000000"
-            "000000000"
-            "000000000"
+           "876591234"
+           "572463918"
+           "574281639"
+           "745819623"
+           "792863541"
+           "368714295"
+           "694527138"
+           "512936847"
+           "327641985"
     };
-    REQUIRE(!b.isFull());
-    REQUIRE(b.findNumberOfErrors() == 6);
-}
-
-// Convert a set of positions as pairs to a set of positions as indices.
-std::unordered_set<size_t> pairToPos(const std::set<std::pair<size_t, size_t>> &pairs) {
-    std::unordered_set<size_t> pos{};
-    std::transform(std::cbegin(pairs), std::cend(pairs),
-            std::inserter(pos, std::begin(pos)),
-            [] (const auto &p) {
-        return p.first * 9 + p.second;
-    });
-    return std::move(pos);
+    REQUIRE(b.isFull());
+    REQUIRE(b.fitness() == 203);
 }
 
 TEST_CASE("Test hasValidEntries") {

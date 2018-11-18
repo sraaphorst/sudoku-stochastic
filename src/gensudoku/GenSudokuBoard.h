@@ -7,6 +7,7 @@
 #pragma once
 
 #include <array>
+#include <bitset>
 #include <iterator>
 #include <iostream>
 #include <map>
@@ -38,7 +39,10 @@ namespace vorpal::gensudoku {
             const auto BoardSize = NN * NN>
     class GenSudokuBoard final: public stochastic::Candidate<GenSudokuBoard<N>, size_t> {
     public:
-        constexpr static auto PerfectFitness = 3 * BoardSize * (NN - 1);
+        /**
+         * The perfect fitness of the board is indicated by every digit appearing in every row, column, and grid.
+         */
+        constexpr static auto PerfectFitness = 3 * NN * NN;
         /**
          * The contents of a board. We represent as a single flat array of length N^4 to simplify certain
          * algorithms and checks.
@@ -133,34 +137,44 @@ namespace vorpal::gensudoku {
          * Determine if a board is done. This will only be the case when the board is complete and has no errors.
          */
         constexpr bool isDone() const noexcept {
-            return isFull() && hasValidEntries() && findNumberOfErrors() == 0;
-        }
-
-
-        /**
-         * Calculate the number of errors on a Sudoku board, i.e. the number of violations that occur.
-         * @return the number of errors
-         */
-        size_t findNumberOfErrors() const noexcept {
-            size_t errorCount = 0;
-
-            for (size_t pos = 0; pos < BoardSize; ++pos) {
-                size_t errors = findNumberOfErrors(pos);
-                if (errors > 0) {
-                    //#pragma omp atomic update
-                    errorCount += errors;
-                }
-            }
-
-            return errorCount;
+            return isFull() && hasValidEntries() && fitness() == PerfectFitness;
         }
 
         /**
-         * Return the fitness of the board, i.e. the maxinum number of possible errors minus the number of errors.
+         * Return the fitness of the board, i.e. the number of unique digits in each row, column, and grid.
+         * Note that rows
          * @return maxerrors - errors
          */
         size_t fitness() const override {
-            return PerfectFitness - findNumberOfErrors();
+            // Row fitness is always 81, as  every row is a permutation.
+            const size_t row_fit = 81;
+
+            // Iterate over columns.
+            size_t col_fit = 0;
+            for (size_t col = 0; col < NN; ++col) {
+                std::bitset<NN+1> col_set;
+
+                for (size_t row = 0; row < NN; ++row)
+                    col_set[contents[row * NN + col]] = true;
+                col_set[0] = false;
+                col_fit += col_set.count();
+            }
+
+            // Iterate over the subgrids.
+            size_t grid_fit = 0;
+            for (size_t gridx = 0; gridx < N; ++gridx) {
+                for (size_t gridy = 0; gridy < N; ++gridy) {
+                    std::bitset<NN+1> grid_set;
+
+                    for (size_t gridrow = 0; gridrow < N; ++gridrow)
+                        for (size_t gridcol = 0; gridcol < N; ++gridcol)
+                            grid_set[contents[(gridx * N + gridrow) * NN + gridy * N + gridcol]] = true;
+                    grid_set[0] = 0;
+                    grid_fit += grid_set.count();
+                }
+            }
+
+            return row_fit + col_fit + grid_fit;
         }
 
     private:
@@ -176,98 +190,6 @@ namespace vorpal::gensudoku {
                 if (contents[i] > NN)
                     throw std::invalid_argument(boost::format("illegal digit at position (%1%,%2$): %3%")
                                                 % (i / 9) % (i % 9) % contents[i]);
-        }
-
-        /**
-         * Static convenience method to take a position and return the row it is in.
-         * @param pos position
-         * @return the row
-         */
-        constexpr static size_t posToRow(size_t pos) noexcept {
-            assert(pos < BoardSize);
-            return pos / NN;
-        }
-
-        /**
-         * Static convenience method to take a position and return the column it is in.
-         * @param pos position
-         * @return the column
-         */
-        constexpr static size_t posToCol(size_t pos) {
-            assert(pos < BoardSize);
-            return pos % NN;
-        }
-
-        /**
-         * Static convenience method to take a position and return what grid it is in.
-         * @param pos position
-         * @return (i,j) representing the grid
-         */
-        constexpr static std::pair<size_t, size_t> posToGrid(size_t pos) {
-            assert(pos < BoardSize);
-            const size_t gridx = (pos / NN) / N;
-            const size_t gridy = (pos % NN) / N;
-            assert(gridx < N);
-            assert(gridy < N);
-            return {gridx, gridy};
-        }
-
-        /**
-         * This method determines, given the current layout, the number of errors in the board.
-         * An error is defined by a cell whose contents violate either a row restriction, a column restriction,
-         * or a grid restriction.
-         *
-         * For example, having two 1s in a row would be considered a row restriction violation.
-         * For positions where the contents are not yet set, there is no restriction violation.
-         *
-         * @param pos the position for which to calculate restrictions
-         * @return the number of restrictions that the contents of this position induces
-         */
-        size_t findNumberOfErrors(size_t pos) const {
-            assert(pos < BoardSize);
-
-            // If this cell is empty, it can't have errors.
-            if (contents[pos] == 0)
-                return 0;
-
-            size_t rowerrors = 0;
-            size_t colerrors = 0;
-            size_t griderrors = 0;
-
-            const auto digit = contents[pos];
-            const auto row = posToRow(pos);
-            const auto col = posToCol(pos);
-
-            // pos falls into the grid (xgrid, ygrid).
-            const auto [gridX, gridY] = posToGrid(pos);
-
-            for (size_t i = 0; i < NN; ++i) {
-                // Handle row errors.
-                const size_t rowpos = row * NN + i;
-                if (rowpos < pos && contents[rowpos] == digit) {
-                    ++rowerrors;
-                }
-
-                // Handle column errors.
-                const size_t colpos = i * NN + col;
-                if (colpos < pos && contents[colpos] == digit) {
-                    ++colerrors;
-                }
-
-                // Handle grid errors.
-                const size_t gridrow = i / N;
-                const size_t gridcol = i % N;
-                const size_t gridpos = NN * (N * gridX + gridrow) + N * gridY + gridcol;
-                if (gridpos < pos && contents[gridpos] == digit) {
-                    ++griderrors;
-                }
-            }
-
-            // Now we return the error count - 3 because we counted the digit in this position three times.
-            assert(rowerrors  < NN);
-            assert(colerrors  < NN);
-            assert(griderrors < NN);
-            return rowerrors + colerrors + griderrors;
         }
 
         friend class GenSudokuBoardPopulator<N, NN>;

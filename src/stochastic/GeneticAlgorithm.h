@@ -36,7 +36,7 @@ namespace vorpal::stochastic {
             std::unique_ptr<Populator<T>> populator = nullptr;
 
             // The  population size of each generation.
-            size_t population_size = 2000;
+            size_t population_size = 500;
 
             // The maximum number of generations to run.
             // Default: as many as possible.

@@ -17,13 +17,12 @@ int main() {
         // Configure the solver.
         using solver = GeneticAlgorithm<SudokuBoard, size_t>;
         solver::Options options;
-        options.populator = std::make_unique<SudokuBoardPopulator>(impossible_board);
+        options.populator = std::make_unique<SudokuBoardPopulator>(easy_board);//(impossible_board);
         options.selector = std::make_unique<KTournamentSelector<SudokuBoard>>(3);
         options.fitness_success_threshold = SudokuBoard::PerfectFitness;
         // Having this set to 0 made a huge difference in one trial.: 1904 - 1935 - 1936 - 1938
         //options.fitness_death_threshold = static_cast<size_t>(SudokuBoard::PerfectFitness * 0.98);
-        options.fitness_death_factor = 0.9875;
-        //options.permissible_dead_rounds = 500'000;
+        options.fitness_death_factor = 0.99;//0.9875;
         options.permissible_dead_rounds = 500'000;
 
         const auto &sol = solver::run(options);
