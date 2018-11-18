@@ -75,6 +75,9 @@ namespace vorpal::stochastic {
 
         template<typename Opts>
         static pointer_type run(Opts&& options) {
+            // Begin timing.
+            const auto start = std::chrono::system_clock::now();
+
             // Force population_size to be even for convenience.
             assert(options.population_size % 2 == 0);
 
@@ -99,8 +102,6 @@ namespace vorpal::stochastic {
 
             // *** Begin a new generation ***
             for (size_t generation = 0; generation < options.max_generations - 1; ++generation) {
-                if (generation % 1000 == 0)
-                    std::cerr << "Generation " << generation << '\n';
                 // Create the candidates for the next generation.
                 std::vector<pointer_type> nextGeneration{options.population_size};
 
@@ -159,7 +160,10 @@ namespace vorpal::stochastic {
 
                 // Output if requested.
                 if (generation % options.output_rounds == 0)
-                    std::cerr << "Generation: " << generation << ", fittest: " << best->fitness() << '\n';
+                    std::cerr << "Generation: " << generation
+                              << ", fittest: " << best->fitness()
+                              << ", time elapsed: " << ((std::chrono::system_clock::now() - start).count() / 1e6) << "s"
+                              << '\n';
 
                 // Copy the new generation to the old and give it a shuffle.
                 // The shuffle is not necessary, but since we add parents in pairs, it will add some randomness.
