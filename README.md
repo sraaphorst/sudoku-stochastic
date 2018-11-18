@@ -58,6 +58,8 @@ Thus, in that sense, the project was a success.
 
 ## TODO ##
 
+The algorithm could use some statistical gathering, and I plan on getting rid of `assert` in lieu of using exceptions.
+
 I would like to examine in more detail how tweaking the parameters affects the likelihood of solution and algorithm speed.
 
 I would also like to see if I can solve the "notoriously hardest puzzle:"
