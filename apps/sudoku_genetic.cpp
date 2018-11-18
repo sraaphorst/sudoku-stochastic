@@ -11,21 +11,18 @@ using namespace vorpal::stochastic;
 
 int main() {
     run_timed("sudoku", []() {
-        SudokuBoard board(
-                "100089457738000000040010000004050906000000000000000728080001000007008095060090300");
+        SudokuBoard easy_board("870090230000003010004281000040809603090060040308704090000527100010900000027040085");
+        SudokuBoard impossible_board("800000000003600000070090200050007000000045700000100030001000068008500010090000400");
 
+        // Configure the solver.
         using solver = GeneticAlgorithm<SudokuBoard, size_t>;
         solver::Options options;
-        //options.selector = std::make_unique<RandomSelector<SudokuBoard>>();
-        //options.selector = std::make_unique<RouletteSelector<SudokuBoard>>();
-        options.selector = std::make_unique<KTournamentSelector<SudokuBoard>>(2);
-        options.crossover_probability = 0.7;
+        options.populator = std::make_unique<SudokuBoardPopulator>(impossible_board);
+        options.selector = std::make_unique<KTournamentSelector<SudokuBoard>>(3);
         options.fitness_success_threshold = SudokuBoard::PerfectFitness;
-        options.fitness_death_threshold = static_cast<size_t>(SudokuBoard::PerfectFitness * 0.95);
-        options.max_generations = 100;
-        options.mutation_probability = 0.9;
-        options.populator = std::make_unique<SudokuBoardPopulator>(board);
-        options.population_size = 10000;
+        options.fitness_death_threshold = static_cast<size_t>(SudokuBoard::PerfectFitness * 0.995);
+        options.fitness_death_factor = 0.9875;
+        options.permissible_dead_rounds = 500'000;
 
         const auto &sol = solver::run(options);
         std::cout << "Best solution found has fitness " << sol->fitness() << ":\n";
