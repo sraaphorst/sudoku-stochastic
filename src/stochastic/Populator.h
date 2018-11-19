@@ -44,7 +44,7 @@ namespace vorpal::stochastic {
         virtual std::pair<pointer_type, pointer_type> crossover(const pointer_type &p0, const pointer_type &p1) noexcept = 0;
 
         /**
-         * Copy the contents of one element to another to indicate survival.
+         * Duplicate contents of a candidate to another unique_ptr to indicate survival.
          * @param the surviving element
          * @return a copy of it for the next generation
          */

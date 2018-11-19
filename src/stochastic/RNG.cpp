@@ -10,6 +10,5 @@
 #include "RNG.h"
 
 namespace vorpal::stochastic {
-    //std::unique_ptr<std::mt19937> RNG::gen = nullptr;
     std::unique_ptr<std::mt19937> RNG::gen{std::make_unique<std::mt19937>(std::random_device{}())};
 }

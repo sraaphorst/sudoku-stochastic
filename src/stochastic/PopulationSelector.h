@@ -7,12 +7,14 @@
 #pragma once
 
 #include <algorithm>
-#include <cassert>
 #include <iterator>
 #include <memory>
 #include <random>
 #include <set>
+#include <stdexcept>
 #include <vector>
+
+#include <boost/format.hpp>
 
 #include "PopulationSelector.h"
 #include "RNG.h"
@@ -27,7 +29,7 @@ namespace vorpal::stochastic {
     struct Selector {
         Selector() = default;
         virtual ~Selector() = default;
-        virtual size_t select(const std::vector<std::unique_ptr<T>>&) const noexcept = 0;
+        virtual size_t select(const std::vector<std::unique_ptr<T>>&) const = 0;
     };
 
     /**
@@ -37,7 +39,7 @@ namespace vorpal::stochastic {
     struct RandomSelector final: Selector<T> {
         RandomSelector() = default;
         ~RandomSelector() = default;
-        size_t select(const std::vector<std::unique_ptr<T>> &ps) const noexcept override {
+        size_t select(const std::vector<std::unique_ptr<T>> &ps) const override {
             const size_t distance = ps.size();
             std::uniform_int_distribution<uint64_t> distribution(0, distance - 1);
             const size_t selection = distribution(RNG::getGenerator());
@@ -54,12 +56,15 @@ namespace vorpal::stochastic {
 
     public:
         explicit KTournamentSelector(size_t k): k{k} {
-            assert(k > 0);
+            if (k == 0)
+                throw std::invalid_argument("k-tournament selection requires positive k");
         }
         ~KTournamentSelector() = default;
 
-        size_t select(const std::vector<std::unique_ptr<T>> &ps) const noexcept override {
-            assert(k <= ps.size());
+        size_t select(const std::vector<std::unique_ptr<T>> &ps) const override {
+            if (k > ps.size())
+                throw std::invalid_argument((boost::format("cannot have a %1%-tournament with a population of size %2%")
+                                             % k % ps.size()).str());
 
             std::uniform_int_distribution<uint64_t> distribution(0, ps.size() - 1);
             auto &gen = RNG::getGenerator();
@@ -86,7 +91,7 @@ namespace vorpal::stochastic {
          RouletteSelector() = default;
          ~RouletteSelector() = default;
 
-         size_t select(const std::vector<std::unique_ptr<T>> &ps) const noexcept override {
+         size_t select(const std::vector<std::unique_ptr<T>> &ps) const override {
              // Tally the fitnesses.
             // We could use std::transform_reduce here, but it seems to only be in llvm and not gcc.
             uint64_t tally = 0;

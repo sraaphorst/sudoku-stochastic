@@ -7,7 +7,6 @@
 #pragma once
 
 #include <memory>
-#include <mutex>
 #include <random>
 
 namespace vorpal::stochastic {
@@ -30,11 +29,6 @@ namespace vorpal::stochastic {
          * auto &gen = RNG::getGenerator();
          */
         static auto &getGenerator() noexcept {
-//            static std::mutex gen_mutex;
-//            std::lock_guard<std::mutex> guard{gen_mutex};
-//            if (!gen)
-//                gen = std::make_unique<std::mt19937>(std::random_device{}());
-//            return *gen;
             return *gen;
         }
     };

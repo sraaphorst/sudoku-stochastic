@@ -79,14 +79,13 @@ namespace vorpal::stochastic {
         template<typename Opts>
         static pointer_type run(Opts&& options) {
             // Verify correct input.
+            if (options.populator == nullptr)
+                throw std::invalid_argument("must set a Populator");
             if (options.population_size % 2 == 1)
                 throw std::invalid_argument("pppulation_size must be even");
 
             // Begin timing.
             const auto start = std::chrono::system_clock::now();
-
-            // Force population_size to be even for convenience.
-            assert(options.population_size % 2 == 0);
 
             auto &gen = RNG::getGenerator();
             std::uniform_real_distribution<double> probabilityGenerator;
