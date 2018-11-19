@@ -2,7 +2,7 @@
 
 **Current stats:** Complete, but with further addons planned.
 
-This is another technique to attempt to solve Sudoku boards using stochastic algorithms.
+This is another technique to attempt to solve Sudoku boards using stochastic algorithms. Note that we do not limit to 3^2 x 3^2 = 9 x 9 boards, but allow for any positive integer n and n^2 x n^2 boards.
 
 In the current omplementation, the focus is on a genetic algorithm that I wrote. The primary purpose of this project is:
 
