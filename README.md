@@ -8,7 +8,7 @@ In the current omplementation, the focus is on a genetic algorithm that I wrote.
 
 1. To implement a genetic algorithm in C++;
 2. To compare the efficiency with brute-force backtracking, exact cover, and constraint programming;
-3. To gain more experience with `std::unique_ptr`, since I had seldom worked with it in the past; and
+3. To gain more experience with `std::unique_ptr` and move its necessary move semantics, since I had seldom worked with them in the past; and
 4. To experiment with OpenMP for parallelization.
 
 ## Formulation ##
