@@ -11,7 +11,10 @@
 #include <algorithm>
 #include <cstdint>
 #include <memory>
+#include <stdexcept>
 #include <vector>
+
+#include <boost/format.hpp>
 
 #include "Candidate.h"
 #include "Populator.h"
@@ -36,14 +39,14 @@ namespace vorpal::stochastic {
             std::unique_ptr<Populator<T>> populator = nullptr;
 
             // The  population size of each generation.
-            size_t population_size = 500;
+            size_t population_size = 2000;
 
             // The maximum number of generations to run.
             // Default: as many as possible.
             uint64_t max_generations = UINT64_MAX;
 
             // The probability that two candidates will breed.
-            double crossover_probability = 0.4;
+            double crossover_probability = 0.3;
 
             // The selector that chooses who will be involved in cross over / breeding when it occurs.
             // The default is 2-tournament selection.
@@ -75,6 +78,10 @@ namespace vorpal::stochastic {
 
         template<typename Opts>
         static pointer_type run(Opts&& options) {
+            // Verify correct input.
+            if (options.population_size % 2 == 1)
+                throw std::invalid_argument("pppulation_size must be even");
+
             // Begin timing.
             const auto start = std::chrono::system_clock::now();
 

@@ -55,7 +55,8 @@ namespace vorpal::gensudoku {
 
         constexpr explicit GenSudokuBoard(const std::string_view &sv) {
             if (sv.size() != BoardSize)
-                throw std::invalid_argument("Sudoku board must be initialized with flat string of appropriate length");
+                throw std::invalid_argument((boost::format("board must be represented by string of length %1%"
+                                                          "(length %2% provided") % NN % sv.size()).str());
 
             for (int i = 0; i < BoardSize; ++i)
                 contents[i] = fromBase36(sv[i]);
@@ -85,22 +86,23 @@ namespace vorpal::gensudoku {
          */
         constexpr const size_t operator[](const std::pair<size_t, size_t> &pos) const noexcept {
             const auto [row, col] = pos;
+            checkPosition(row, col);
             return contents[row * NN + col];
         }
 
         constexpr size_t &operator[](const std::pair<size_t, size_t> &pos) noexcept {
             const auto [row, col] = pos;
-            assert(row < NN && col < NN);
+            checkPosition(row, col);
             return contents[row * NN + col];
         }
 
         constexpr const size_t operator[](size_t pos) const noexcept {
-            assert(pos < BoardSize);
+            checkPosition(pos);
             return contents[pos];
         }
 
         constexpr size_t &operator[](size_t pos) noexcept {
-            assert(pos < BoardSize);
+            checkPosition(pos);
             return contents[pos];
         }
 
@@ -175,6 +177,24 @@ namespace vorpal::gensudoku {
 
     private:
         /**
+         * Check a position of a Sudoku board to ensure it is valid.
+         * @param x x coord
+         * @param y y coord
+         */
+        static void checkPosition(size_t x, size_t y) {
+            if (x >= NN || y >= NN)
+                throw std::invalid_argument((boost::format("invalid position (%1%,%2%") % x % y).str());
+        }
+
+        /**
+         * Check a flat position of a Sudoku board to ensure it is valid.
+         * @param pos coord
+         */
+        static void checkPosition(size_t pos) {
+            checkPosition(pos / NN, pos % NN);
+        }
+
+        /**
          * A static method that, given a contents, determines if the members of the contents are legal, i.e.
          * either 0 (the special empty marker), or [1, N^2].
          * @tparam B to make universal reference to contents
@@ -184,8 +204,8 @@ namespace vorpal::gensudoku {
         static void checkContents(B &&contents) {
             for (size_t i = 0; i < BoardSize; ++i)
                 if (contents[i] > NN)
-                    throw std::invalid_argument(boost::format("illegal digit at position (%1%,%2$): %3%")
-                                                % (i / 9) % (i % 9) % contents[i]);
+                    throw std::invalid_argument((boost::format("illegal digit at position (%1%,%2%): %3%")
+                                                 % (i / NN) % (i % NN) % contents[i]).str());
         }
 
         friend class GenSudokuBoardPopulator<N, NN>;
