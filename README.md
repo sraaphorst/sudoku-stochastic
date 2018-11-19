@@ -21,7 +21,7 @@ In the current omplementation, the focus is on a genetic algorithm that I wrote.
 
 - Mutation occurs with a fixed probability on the children, and consists of choosing a row, and then swapping a new row permtutation (that reflects the fixed cells) in place.
 
-- Every generation, we euthanize candidates that are weak and replace them with new random candidates. If the board with the best fitness found has not changed for a large number of rounds, we kill and replace the entire generation and then reset the timer.
+- Every generation, we euthanize candidates that are weak and replace them with new random candidates. If the board with the best fitness found has not changed for a large number of rounds, we kill and replace the entire generation and then reset the counter.
 
 - **Fitness:** We measure the fitness of a Sudoku board by the sum of the number of distinct digits per row, column, and subgrid. Note that rows are unimportant, as being permutations, every candidate has perfect row fitness.
 
