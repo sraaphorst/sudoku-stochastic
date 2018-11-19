@@ -15,9 +15,9 @@ In the current omplementation, the focus is on a genetic algorithm that I wrote.
 
 - Every row of a Sudoku board is one of the `9! = 36,2880` permutations in `S_9`. (The same is true for columns and grids.)
 
-- The idea behind generating a random board is to take the partialy filled board, and randomly complete the rown permutation.
+- The idea behind generating a random board is to take the partialy filled board, and randomly complete the row permutation.
 
-- Crossover breeding occurs with a fixed probability using a pre-chosen selection algorithms (k-tournament, roulette, and random). Two children are produced row-by-row, each with one or the other corresponding row from one of the parents.
+- Crossover breeding occurs with a fixed probability using a pre-chosen selection algorithm (k-tournament, roulette, and random are currently offered). Two children are produced row-by-row, each with one or the other corresponding row from one of the parents with fixed probability.
 
 - Mutation occurs with a fixed probability on the children, and consists of choosing a row, and then swapping a new row permtutation (that reflects the fixed cells) in place.
 
