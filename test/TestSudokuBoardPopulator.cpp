@@ -7,7 +7,7 @@
 #include <catch.hpp>
 
 #include <GenSudokuBoard.h>
-#include <GenSudokuBoardPopulator.h>
+#include <GenSudokuBoardGAPopulator.h>
 
 using namespace vorpal::gensudoku;
 

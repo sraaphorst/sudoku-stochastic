@@ -7,7 +7,7 @@ add_library(stochastic SHARED
         Candidate.h
         GeneticAlgorithm.h
         PopulationSelector.h
-        Populator.h
+        GeneticPopulator.h
         RNG.h
         RNG.cpp
         )

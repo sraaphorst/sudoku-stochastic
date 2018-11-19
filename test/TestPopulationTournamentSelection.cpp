@@ -11,7 +11,7 @@
 
 #include "PopulationSelector.h"
 #include "GenSudokuBoard.h"
-#include "GenSudokuBoardPopulator.h"
+#include "GenSudokuBoardGAPopulator.h"
 
 using namespace vorpal::gensudoku;
 using namespace vorpal::stochastic;

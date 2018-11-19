@@ -9,6 +9,7 @@
 #include <omp.h>
 
 #include <algorithm>
+#include <chrono>
 #include <cstdint>
 #include <memory>
 #include <stdexcept>
@@ -17,7 +18,7 @@
 #include <boost/format.hpp>
 
 #include "Candidate.h"
-#include "Populator.h"
+#include "GeneticPopulator.h"
 #include "PopulationSelector.h"
 #include "RNG.h"
 
@@ -36,7 +37,7 @@ namespace vorpal::stochastic {
         struct Options {
             // The populator that handles actions such as mutations, crossovers, and generating random candidates.
             // MUST be set for the algorithm to function.
-            std::unique_ptr<Populator<T>> populator = nullptr;
+            std::unique_ptr<GeneticPopulator<T>> populator = nullptr;
 
             // The  population size of each generation.
             size_t population_size = 2000;
@@ -80,7 +81,7 @@ namespace vorpal::stochastic {
         static pointer_type run(Opts&& options) {
             // Verify correct input.
             if (options.populator == nullptr)
-                throw std::invalid_argument("must set a Populator");
+                throw std::invalid_argument("must set a GeneticPopulator");
             if (options.population_size % 2 == 1)
                 throw std::invalid_argument("pppulation_size must be even");
 
@@ -107,7 +108,7 @@ namespace vorpal::stochastic {
             pointer_type best = options.populator->survive(prevGeneration[max_init]);
 
             // *** Begin a new generation ***
-            for (size_t generation = 0; generation < options.max_generations - 1; ++generation) {
+            for (uint64_t generation = 0; generation < options.max_generations - 1; ++generation) {
                 // Create the candidates for the next generation.
                 std::vector<pointer_type> nextGeneration{options.population_size};
 

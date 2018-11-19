@@ -7,7 +7,7 @@
 #include <catch.hpp>
 
 #include "GenSudokuBoard.h"
-#include "GenSudokuBoardPopulator.h"
+#include "GenSudokuBoardGAPopulator.h"
 
 #include "GeneticAlgorithm.h"
 
