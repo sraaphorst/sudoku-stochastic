@@ -5,7 +5,7 @@
  */
 
 #pragma once
-
+#include <iostream>
 #include <algorithm>
 #include <bitset>
 #include <random>
@@ -27,7 +27,6 @@ namespace vorpal::gensudoku {
     class GenSudokuBoardGAPopulator final:
             public GenSudokuBoardPopulator<N>,
             public stochastic::GeneticPopulator<GenSudokuBoard<N>> {
-        GenSudokuBoard<N> partial_board;
         std::vector<std::vector<size_t>> rowEmptyPositions;
         std::vector<std::vector<size_t>> rowMissingEntries;
 
@@ -57,7 +56,7 @@ namespace vorpal::gensudoku {
          */
         pointer_type generate() noexcept override {
             // For each row, shuffle the missing entries and distribute them amongst the empty positions.
-            auto board = std::make_unique<GenSudokuBoard<N>>(partial_board);
+            auto board = std::make_unique<GenSudokuBoard<N>>(this->partial_board);
 
             for (size_t row = 0; row < NN; ++row)
                 fillRow(board, row);
@@ -128,19 +127,30 @@ namespace vorpal::gensudoku {
         /**
          * Given a board and a row, permute the missing entries and use them to fill the row.
          * This is common code to generating boards and mutating a board.
+         * We use the cell_contents that we precomputed to make sure the rows are viable.
          * @param board the board
          * @param row the row to fill
          */
         void fillRow(std::unique_ptr<GenSudokuBoard<N>> &board, size_t row) noexcept {
-            // Shuffle the candidates for the row.
+            // Repeatedly shuffle the candidates for the row and try to insert until we can.
             auto &gen = stochastic::RNG::getGenerator();
+            for (;;) {
+                std::vector<size_t> &entries = rowMissingEntries[row];
+                std::shuffle(std::begin(entries), std::end(entries), gen);
 
-            std::vector<size_t> entries = rowMissingEntries[row];
-            std::shuffle(std::begin(entries), std::end(entries), gen);
+                bool flag = true;
+                for (size_t col = 0; col < entries.size(); ++col) {
+                    const auto pos = row * NN + rowEmptyPositions[row][col];
+                    const auto cend = std::cend(this->cell_candidates[pos]);
+                    if (std::find(std::cbegin(this->cell_candidates[pos]), cend, entries[col]) == cend) {
+                        flag = false;
+                        break;
+                    }
+                    (*board)[pos] = entries[col];
+                }
 
-            for (size_t col = 0; col < entries.size(); ++col) {
-                size_t pos = row * NN + rowEmptyPositions[row][col];
-                (*board)[pos] = entries[col];
+                if (flag)
+                    break;
             }
         }
 
@@ -158,10 +168,10 @@ namespace vorpal::gensudoku {
 
                 for (size_t col = 0; col < NN; ++col) {
                     const size_t pos = row * NN + col;
-                    if (partial_board[pos] == 0)
+                    if (this->partial_board[pos] == 0)
                         emptyPositions[col] = true;
                     else
-                        presentEntries[partial_board[pos]] = true;
+                        presentEntries[this->partial_board[pos]] = true;
                 }
 
                 // Conglomerate the data.

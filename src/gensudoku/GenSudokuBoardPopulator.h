@@ -6,8 +6,6 @@
 
 #pragma once
 
-#include <omp.h>
-
 #include <algorithm>
 #include <stdexcept>
 #include <vector>
@@ -62,7 +60,6 @@ namespace vorpal::gensudoku {
             std::iota(std::begin(base_set), std::end(base_set), 1);
 
             // Determine what numbers can go in what space.
-            #pragma omp parallel for
             for (size_t idx = 0; idx < BoardSize; ++idx) {
                 // If the cell is fixed by default, it only has one candidate.
                 if (partial_board[idx] != 0) {
@@ -75,8 +72,8 @@ namespace vorpal::gensudoku {
                 const auto row = idx / NN;
                 const auto col = idx % NN;
 
-                const auto gridrow = row / NN;
-                const auto gridcol = col / NN;
+                const auto gridrow = row / N;
+                const auto gridcol = col / N;
 
                 // Remove the row, column and grid entries.
                 for (size_t i = 0; i < NN; ++i) {
@@ -85,14 +82,13 @@ namespace vorpal::gensudoku {
 
                     // Get the grid entry.
                     const auto grididx =(gridrow * N + i / N) * NN + (gridcol * N + i % N);
-                    const  auto grid_entry = partial_board[grididx];
-
+                    const auto grid_entry = partial_board[grididx];
                     if (row_entry != 0) vec.erase(std::remove(vec.begin(), vec.end(), row_entry), vec.end());
                     if (col_entry != 0) vec.erase(std::remove(vec.begin(), vec.end(), col_entry), vec.end());
                     if (grid_entry != 0) vec.erase(std::remove(vec.begin(), vec.end(), grid_entry), vec.end());
                 }
                 if (vec.empty())
-                    throw std::invalid_argument(boost::format("invalid board: position (%1%,%2%) has no candidate").str());
+                    throw std::invalid_argument((boost::format("invalid board: position (%1%,%2%) has no candidate") % row % col).str());
                 cell_candidates[idx] = vec;
             }
         }

@@ -6,8 +6,6 @@
 
 #pragma once
 
-#include <omp.h>
-
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
@@ -73,7 +71,7 @@ namespace vorpal::stochastic {
             // Default: never kill.
             uint64_t permissible_dead_rounds = UINT64_MAX;
 
-            // Output the best candidate's fitness and the number of rounds every this many roounds.
+            // Output the best candidate's fitness and the number of rounds every this many rounds.
             uint64_t output_rounds = 1'000;
         };
 
@@ -112,9 +110,9 @@ namespace vorpal::stochastic {
                 // Create the candidates for the next generation.
                 std::vector<pointer_type> nextGeneration{options.population_size};
 
+                //std::mutex crap;
                 /** Most of the work that can be easily parallelized is here, and propagates forward. **/
                 const size_t maxiters = options.population_size/2;
-                #pragma omp parallel for default(shared)
                 for (size_t i = 0; i < options.population_size/2; ++i) {
                     // Crossover if probability dictates.
                     if (probabilityGenerator(gen) < options.crossover_probability) {
@@ -122,7 +120,6 @@ namespace vorpal::stochastic {
                         const auto &p0 = prevGeneration[p0Idx];
                         const size_t p1Idx = options.selector->select(prevGeneration);
                         const auto &p1 = prevGeneration[p1Idx];
-
                         auto [c0, c1] = options.populator->crossover(p0, p1);
                         nextGeneration[2*i] = (probabilityGenerator(gen) < options.mutation_probability) ?
                                 std::move(options.populator->mutate(c0)) : std::move(c0);
@@ -158,13 +155,11 @@ namespace vorpal::stochastic {
                         static_cast<Fitness>(options.fitness_death_factor * best->fitness()));
 
                 // Demise: is it time to euthanize?
-                #pragma omp parallel for
                 for (size_t i = 0; i < options.population_size; ++i)
                     if (deadRounds >= options.permissible_dead_rounds || nextGeneration[i]->fitness() <= kill_threshold)
                         nextGeneration[i] = std::move(options.populator->generate());
                 if (deadRounds >= options.permissible_dead_rounds) {
                     std::cerr << "Killed everything\n";
-                    #pragma omp atomic write
                     deadRounds = 0;
                 }
 
