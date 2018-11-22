@@ -12,6 +12,7 @@
 #include <tuple>
 #include <vector>
 
+#include "DefaultMethods.h"
 #include "GeneticPopulator.h"
 #include "GenSudokuBoard.h"
 #include "GenSudokuBoardPopulator.h"
@@ -30,25 +31,7 @@ namespace vorpal::gensudoku {
         std::vector<std::vector<size_t>> rowEmptyPositions;
         std::vector<std::vector<size_t>> rowMissingEntries;
 
-    public:
-        using pointer_type = std::unique_ptr<GenSudokuBoard<N>>;
-
-        GenSudokuBoardGAPopulator() = delete;
-        GenSudokuBoardGAPopulator(const GenSudokuBoardGAPopulator&) = default;
-        GenSudokuBoardGAPopulator(GenSudokuBoardGAPopulator&&) = default;
-        GenSudokuBoardGAPopulator &operator=(const GenSudokuBoardGAPopulator&) = default;
-
-        explicit GenSudokuBoardGAPopulator(const GenSudokuBoard<N> &partial_board):
-            GenSudokuBoardPopulator<N>{partial_board} {
-            initialize();
-        }
-
-        explicit GenSudokuBoardGAPopulator(GenSudokuBoard<N> &&partial_board):
-            GenSudokuBoardPopulator<N>{partial_board} {
-            initialize();
-        }
-
-        ~GenSudokuBoardGAPopulator() = default;
+        __CONSTRUCTORS_WITH_INIT(GenSudokuBoardGAPopulator, GenSudokuBoardPopulator<N>);
 
         /**
          * Generate a random board from the partial board this class was initialized it.

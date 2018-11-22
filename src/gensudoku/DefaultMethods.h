@@ -7,21 +7,23 @@
 #pragma once
 
 /**
- * I probably shouldn't be doing this, but due to the depth of the class hierarchy, typing the same constructos
- * over and over again is getting severely tedious.
+ * This is not exactly an idea will probably be met with much approval, but I am tired of writing the exact
+ * same set of constructors and basic operators over and over again.
  */
-#define CONSTRUCTORS_WITH_INIT(classname, superclassname, initializer) \
+#define __CONSTRUCTORS_WITH_INIT(classname, superclassname) \
+public:\
     using data_type = GenSudokuBoard<N>; \
-    using pointer_type = std::unique_ptr<data_type> \
+    using pointer_type = std::unique_ptr<data_type>; \
     classname() = delete; \
     classname(const classname&) = default; \
-    classname(classname&&) = default; \
+    classname(classname&&) noexcept = default; \
     classname &operator=(const classname&) = default; \
-    explicit classname(const data_type &partial_board): superclassname{partial_board} { initializer(); } \
-    explicit classname(data_type &&partial_board): superclassname{partial_board} { initializer(); } \
-    virtual ~##classname() = default;
+    explicit classname(const data_type &partial_board): superclassname{partial_board} { initialize(); } \
+    explicit classname(data_type &&partial_board): superclassname{partial_board} { initialize(); } \
+    virtual ~classname() = default;
 
 #define CONSTRUCTORS(classname, superclassname) \
+public:\
     using data_type = GenSudokuBoard<N>; \
     using pointer_type = std::unique_ptr<data_type> \
     classname() = delete; \
