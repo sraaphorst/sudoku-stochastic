@@ -22,10 +22,12 @@ namespace vorpal::gensudoku {
      * The implementation for the most basic form of hill climbing.
      * @tparam N the size parameter
      */
-    template<size_t N = 3, const auto NN = N * N, const auto BoardSize = NN  * NN>
+    template<size_t N = 3,
+            const auto NN = N * N,
+            const auto BoardSize = NN  * NN>
     class GenSudokuBoardHCPopulator:
-            public GenSudokuBoardPopulator<N>,
-            public stochastic::AscenderPopulator<GenSudokuBoard<N>> {
+            public virtual GenSudokuBoardPopulator<N>,
+            public virtual stochastic::AscenderPopulator<GenSudokuBoard<N>> {
 
         constexpr static double DEFAULT_N_PROBABILITY = 0.3;
 

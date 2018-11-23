@@ -18,7 +18,7 @@
 #include "ConstMath.h"
 
 namespace vorpal::gensudoku {
-    template<size_t, size_t> class GenSudokuBoardGAPopulator;
+    template<size_t, auto> class GenSudokuBoardGAPopulator;
 
     /**
      * A generic sudoku board of size parameter N, i.e. the board has:
@@ -208,6 +208,7 @@ namespace vorpal::gensudoku {
                                                  % (i / NN) % (i % NN) % contents[i]).str());
         }
 
+        // TODO: We probably want to get rid of this.
         friend class GenSudokuBoardGAPopulator<N, NN>;
     };
 

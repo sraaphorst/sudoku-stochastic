@@ -28,7 +28,9 @@ namespace vorpal::gensudoku {
      *
      * @tparam N the size parameter
      */
-    template<size_t N = 3, const auto NN = N * N, const auto BoardSize = NN * NN>
+    template<size_t N = 3,
+            const auto NN = N * N,
+            const auto BoardSize = NN * NN>
     class GenSudokuBoardPopulator: public stochastic::Populator<GenSudokuBoard<N>> {
     protected:
         // The partial Sudoku board, with 0s representing unfilled cells.

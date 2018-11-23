@@ -23,7 +23,7 @@ namespace vorpal::gensudoku {
      * @tparam N the size parameter
      */
     template<size_t N=3,
-            const size_t NN = N * N>
+            const auto NN = N * N>
     class GenSudokuBoardGAPopulator final:
             public virtual GenSudokuBoardPopulator<N>,
             public virtual stochastic::GeneticPopulator<GenSudokuBoard<N>> {
