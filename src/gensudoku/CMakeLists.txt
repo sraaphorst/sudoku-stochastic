@@ -5,7 +5,10 @@ project(gensudoku VERSION 0.1.0 LANGUAGES CXX)
 
 #add_library(gensudoku SHARED
 #        ConstMath.h
-#        ConstMath.cpp
+#        DefaultMethods.h
 #        GenSudokuBoard.h
+#        GenSudokuBoardGAPopulator.h
+#        GenSudokuBoardHCPopulator.h
 #        GenSudokuBoardPopulator.h
+#        PredefinedBoards.h
 #        )

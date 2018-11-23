@@ -7,13 +7,19 @@
 #pragma once
 
 #include <algorithm>
+#include <memory>
 #include <stdexcept>
 #include <vector>
 
 #include <boost/format.hpp>
 
 #include "Populator.h"
+#include "RNG.h"
 #include "GenSudokuBoard.h"
+#include "Populator.h"
+#include "RNG.h"
+
+#include <iostream>
 
 namespace vorpal::gensudoku {
     /**
@@ -27,6 +33,9 @@ namespace vorpal::gensudoku {
     protected:
         // The partial Sudoku board, with 0s representing unfilled cells.
         GenSudokuBoard<N> partial_board;
+
+        std::vector<std::vector<size_t>> rowEmptyPositions;
+        std::vector<std::vector<size_t>> rowMissingEntries;
 
         // Refine the possible contents of the cells, indexed by position, in a sorted collection.
         // This will allow O(1) access when randomly picking an element.
@@ -50,9 +59,54 @@ namespace vorpal::gensudoku {
             initialize();
         }
 
-        ~GenSudokuBoardPopulator() = default;
+        virtual ~GenSudokuBoardPopulator() = default;
 
-    private:
+        /**
+         * Generate a random board from the partial board this class was initialized it.
+         * @return a random board
+         */
+        pointer_type generate() noexcept override {
+            // For each row, shuffle the missing entries and distribute them amongst the empty positions.
+            auto board = std::make_unique<GenSudokuBoard<N>>(this->partial_board);
+
+            for (size_t row = 0; row < NN; ++row)
+                fillRow(board, row);
+            return board;
+        }
+
+    protected:
+        /**
+         * Given a board and a row, permute the missing entries and use them to fill the row.
+         * This is common code to generating boards and mutating a board.
+         * We use the cell_contents that we precomputed to make sure the rows are viable.
+         * @param board the board
+         * @param row the row to fill
+         */
+        void fillRow(std::unique_ptr<GenSudokuBoard<N>> &board, size_t row) noexcept {
+            // Repeatedly shuffle the candidates for the row and try to insert until we can.
+            auto &gen = stochastic::RNG::getGenerator();
+            for (;;) {
+                std::vector<size_t> &entries = rowMissingEntries[row];
+                std::cerr << "Entries has size " << rowMissingEntries.size() << '\n';
+                std::cerr << "EntriesEntries has size " << rowMissingEntries[row].size() << '\n';
+                std::shuffle(std::begin(entries), std::end(entries), gen);
+
+                bool flag = true;
+                for (size_t col = 0; col < entries.size(); ++col) {
+                    const auto pos = row * NN + rowEmptyPositions[row][col];
+                    const auto cend = std::cend(cell_candidates[pos]);
+                    if (std::find(std::cbegin(cell_candidates[pos]), cend, entries[col]) == cend) {
+                        flag = false;
+                    break;
+                }
+                (*board)[pos] = entries[col];
+            }
+            if (flag)
+                break;
+        }
+    }
+
+    protected:
         void initialize() {
             // Create a set to copy from.
             std::vector<size_t> base_set{NN};
@@ -90,6 +144,35 @@ namespace vorpal::gensudoku {
                 if (vec.empty())
                     throw std::invalid_argument((boost::format("invalid board: position (%1%,%2%) has no candidate") % row % col).str());
                 cell_candidates[idx] = vec;
+            }
+
+            // We iterate over each row, finding the missing positions and empty entries.
+            for (size_t row = 0; row < NN; ++row) {
+                std::bitset<NN> emptyPositions;
+                emptyPositions.reset();
+                std::bitset<NN + 1> presentEntries;
+                presentEntries.reset();
+
+                for (size_t col = 0; col < NN; ++col) {
+                    const size_t pos = row * NN + col;
+                    if (this->partial_board[pos] == 0)
+                        emptyPositions[col] = true;
+                    else
+                        presentEntries[this->partial_board[pos]] = true;
+                }
+
+                // Conglomerate the data.
+                std::vector<size_t> rEmptyPositions;
+                std::vector<size_t> rMissingEntries;
+                for (size_t col = 0; col < NN; ++col) {
+                    if (emptyPositions[col] == 1)
+                        rEmptyPositions.emplace_back(col);
+                    if (presentEntries[col + 1] == 0)
+                        rMissingEntries.emplace_back(col + 1);
+                }
+                assert(rEmptyPositions.size() == rMissingEntries.size());
+                rowEmptyPositions.emplace_back(std::move(rEmptyPositions));
+                rowMissingEntries.emplace_back(std::move(rMissingEntries));
             }
         }
     };

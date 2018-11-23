@@ -34,6 +34,6 @@ namespace vorpal::stochastic {
          * @param current the current node
          * @return a node that, by the hill-climbing variant strategy, is picked next.
          */
-        virtual pointer_type selectedNeighbour(int iteration, const pointer_type &current) = 0;
+        virtual pointer_type selectedNeighbour(int iteration, pointer_type &current) const = 0;
     };
 }

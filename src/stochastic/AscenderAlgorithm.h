@@ -1,5 +1,5 @@
 /**
- * Ascender.h
+ * AscenderAlgorithm.h
  *
  * By Sebastian Raaphorst, 2018.
  */
@@ -20,14 +20,14 @@ namespace vorpal::stochastic {
      * This allows us to implement a number of different hill-climbing like algorithms in a single strategy.
      */
     template<typename T, typename Fitness = size_t>
-    class Ascender final {
+    class AscenderAlgorithm final {
     public:
         using pointer_type = std::unique_ptr<T>;
 
-        BetaHillClimber() = delete;
+        AscenderAlgorithm() = delete;
 
         struct Options {
-            std::unique_ptr<AscenderPopulator> populator = nullptr;
+            std::unique_ptr<AscenderPopulator<T>> populator = nullptr;
 
             // The maximum number of iterations before the hill climber resets.
             uint64_t max_iterations_per_round = 2000;
@@ -40,7 +40,7 @@ namespace vorpal::stochastic {
             Fitness fitness_success_threshold;
         };
 
-        template<typename &&Opts>
+        template<typename Opts>
         static pointer_type run(Opts&& options) {
             // Verify correct input.
             if (options.populator == nullptr)
@@ -53,19 +53,24 @@ namespace vorpal::stochastic {
 
             for (uint64_t round = 0; round < options.max_rounds; ++round) {
                 // Create the original candidate.
-                pointer_type candidate = options.populator->random();
+                pointer_type candidate = std::move(options.populator->generate());
+                std::cerr << "CREATED CANDIDATE:\n";
+                for (int i = 0; i < 81; ++i) {
+                        std::cerr << (*candidate)[i];
+                }
+                std::cerr << '\n';
 
                 for (uint64_t iteration = 0; iteration < options.max_iterations_per_round; ++iteration) {
                     // Move to the neighbour.
-                    candidate = std::move(options->populator->selectedNeighbour(iteration, candidate));
+                    candidate = std::move(options.populator->selectedNeighbour(iteration, candidate));
 
-                    if (candidates->fitness() >= options.fitness_success_threshold) {
+                    if (candidate->fitness() >= options.fitness_success_threshold) {
                         std::cerr << "Solved in round " << round << " at iteration " << iteration;
                         return candidate;
                     }
                 }
 
-                if (!best || best->fitness() < candidate.fitness())
+                if (!best || best->fitness() < candidate->fitness())
                     best = std::move(candidate);
             }
 

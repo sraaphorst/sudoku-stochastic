@@ -13,8 +13,6 @@
 #include <stdexcept>
 #include <vector>
 
-#include <boost/format.hpp>
-
 #include "Candidate.h"
 #include "GeneticPopulator.h"
 #include "PopulationSelector.h"
@@ -82,13 +80,11 @@ namespace vorpal::stochastic {
                 throw std::invalid_argument("must set a GeneticPopulator");
             if (options.population_size % 2 == 1)
                 throw std::invalid_argument("pppulation_size must be even");
-
             // Begin timing.
             const auto start = std::chrono::system_clock::now();
 
             auto &gen = RNG::getGenerator();
             std::uniform_real_distribution<double> probabilityGenerator;
-
             // Keep track of the number of rounds we haven't improved.
             uint64_t deadRounds = 0;
 
@@ -104,7 +100,6 @@ namespace vorpal::stochastic {
 
             // Now create the pointer and store.
             pointer_type best = options.populator->survive(prevGeneration[max_init]);
-
             // *** Begin a new generation ***
             for (uint64_t generation = 0; generation < options.max_generations - 1; ++generation) {
                 // Create the candidates for the next generation.

@@ -5,12 +5,11 @@
  */
 
 #pragma once
-#include <iostream>
 #include <algorithm>
 #include <bitset>
+#include <memory>
 #include <random>
 #include <tuple>
-#include <vector>
 
 #include "DefaultMethods.h"
 #include "GeneticPopulator.h"
@@ -26,12 +25,19 @@ namespace vorpal::gensudoku {
     template<size_t N=3,
             const size_t NN = N * N>
     class GenSudokuBoardGAPopulator final:
-            public GenSudokuBoardPopulator<N>,
-            public stochastic::GeneticPopulator<GenSudokuBoard<N>> {
-        std::vector<std::vector<size_t>> rowEmptyPositions;
-        std::vector<std::vector<size_t>> rowMissingEntries;
+            public virtual GenSudokuBoardPopulator<N>,
+            public virtual stochastic::GeneticPopulator<GenSudokuBoard<N>> {
 
-        __CONSTRUCTORS_WITH_INIT(GenSudokuBoardGAPopulator, GenSudokuBoardPopulator<N>);
+        __GENSUDOKUBOARD_POPULATOR_CONSTRUCTORS(GenSudokuBoardGAPopulator, GenSudokuBoardPopulator);
+
+//    public:
+//        using data_type = GenSudokuBoard<N>;
+//        using pointer_type = std::unique_ptr<data_type>;
+//
+//        GenSudokuBoardGAPopulator() = delete;
+//        explicit GenSudokuBoardGAPopulator(const data_type &partial_board): GenSudokuBoardPopulator<N>{partial_board} {}
+//        explicit GenSudokuBoardGAPopulator(data_type &&partial_board): GenSudokuBoardPopulator<N>{partial_board} {}
+
 
         /**
          * Generate a random board from the partial board this class was initialized it.
@@ -40,10 +46,9 @@ namespace vorpal::gensudoku {
         pointer_type generate() noexcept override {
             // For each row, shuffle the missing entries and distribute them amongst the empty positions.
             auto board = std::make_unique<GenSudokuBoard<N>>(this->partial_board);
-
             for (size_t row = 0; row < NN; ++row)
-                fillRow(board, row);
-            return board;
+                this->fillRow(board, row);
+            return std::move(board);
         }
 
         /**
@@ -63,9 +68,9 @@ namespace vorpal::gensudoku {
             // Select a row at random and shuffle the candidates.
             auto &gen = stochastic::RNG::getGenerator();
             const size_t row = std::uniform_int_distribution<size_t>{0, NN - 1}(gen);
-            fillRow(board, row);
+            this->fillRow(board, row);
 
-            return board;
+            return std::move(board);
         }
 
         /**
@@ -102,74 +107,8 @@ namespace vorpal::gensudoku {
         }
 
         pointer_type survive(const pointer_type &p) noexcept override {
-            pointer_type c = std::make_unique<GenSudokuBoard<N>>(*p);
+            pointer_type c = std::make_unique<data_type>(*p);
             return std::move(c);
-        }
-
-    private:
-        /**
-         * Given a board and a row, permute the missing entries and use them to fill the row.
-         * This is common code to generating boards and mutating a board.
-         * We use the cell_contents that we precomputed to make sure the rows are viable.
-         * @param board the board
-         * @param row the row to fill
-         */
-        void fillRow(std::unique_ptr<GenSudokuBoard<N>> &board, size_t row) noexcept {
-            // Repeatedly shuffle the candidates for the row and try to insert until we can.
-            auto &gen = stochastic::RNG::getGenerator();
-            for (;;) {
-                std::vector<size_t> &entries = rowMissingEntries[row];
-                std::shuffle(std::begin(entries), std::end(entries), gen);
-
-                bool flag = true;
-                for (size_t col = 0; col < entries.size(); ++col) {
-                    const auto pos = row * NN + rowEmptyPositions[row][col];
-                    const auto cend = std::cend(this->cell_candidates[pos]);
-                    if (std::find(std::cbegin(this->cell_candidates[pos]), cend, entries[col]) == cend) {
-                        flag = false;
-                        break;
-                    }
-                    (*board)[pos] = entries[col];
-                }
-
-                if (flag)
-                    break;
-            }
-        }
-
-        /**
-         * Iterate over each row of the partial board, and determine what entries are missing and from what positions.
-         * We only perform this once, so there is no point to parallelization.
-         */
-        void initialize() noexcept {
-            // We iterate over each row, finding the missing positions and empty entries.
-            for (size_t row = 0; row < NN; ++row) {
-                std::bitset<NN> emptyPositions;
-                emptyPositions.reset();
-                std::bitset<NN + 1> presentEntries;
-                presentEntries.reset();
-
-                for (size_t col = 0; col < NN; ++col) {
-                    const size_t pos = row * NN + col;
-                    if (this->partial_board[pos] == 0)
-                        emptyPositions[col] = true;
-                    else
-                        presentEntries[this->partial_board[pos]] = true;
-                }
-
-                // Conglomerate the data.
-                std::vector<size_t> rEmptyPositions;
-                std::vector<size_t> rMissingEntries;
-                for (size_t col = 0; col < NN; ++col) {
-                    if (emptyPositions[col] == 1)
-                        rEmptyPositions.emplace_back(col);
-                    if (presentEntries[col + 1] == 0)
-                        rMissingEntries.emplace_back(col + 1);
-                }
-                assert(rEmptyPositions.size() == rMissingEntries.size());
-                rowEmptyPositions.emplace_back(std::move(rEmptyPositions));
-                rowMissingEntries.emplace_back(std::move(rMissingEntries));
-            }
         }
     };
 

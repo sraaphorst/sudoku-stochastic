@@ -1,4 +1,11 @@
+/**
+ * sudoku_ga.cpp
+ *
+ * By Sebastian Raaphorst, 2018.
+ */
+
 #include <iostream>
+#include <memory>
 
 #include <GenSudokuBoard.h>
 #include <GenSudokuBoardGAPopulator.h>
@@ -15,7 +22,7 @@ int main() {
         // Configure the solver.
         using solver = GeneticAlgorithm<SudokuBoard, size_t>;
         solver::Options options;
-        options.populator = std::make_unique<SudokuBoardGAPopulator>(PredefinedBoards::impossible_board);
+        options.populator = std::make_unique<SudokuBoardGAPopulator>(PredefinedBoards::easy_board1);
         options.selector = std::make_unique<KTournamentSelector<SudokuBoard>>(4);
         options.fitness_success_threshold = SudokuBoard::PerfectFitness;
         options.fitness_death_factor = 0.8;
