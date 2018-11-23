@@ -49,7 +49,6 @@
  * initialize data structures.
  */
 #define __GENSUDOKUBOARD_POPULATOR_CONSTRUCTORS_WITH_INIT(classname, superclassname) \
-public:\
     __GENSUDOKUBOARD_POPULATOR_TYPE_ALIASES \
     __GENSUDOKUBOARD_POPULATOR_STANDARD_CONSTRUCTORS(classname) \
     __GENSUDOKUBOARD_POPULATOR_CONTENTS_CONSTRUCTORS_WITH_INIT(classname, superclassname)
@@ -61,7 +60,6 @@ public:\
  * do not initialize data structures.
  */
 #define __GENSUDOKUBOARD_POPULATOR_CONSTRUCTORS(classname, superclassname) \
-public:\
     __GENSUDOKUBOARD_POPULATOR_TYPE_ALIASES \
     __GENSUDOKUBOARD_POPULATOR_STANDARD_CONSTRUCTORS(classname) \
     __GENSUDOKUBOARD_POPULATOR_CONTENTS_CONSTRUCTORS(classname, superclassname)
@@ -71,6 +69,5 @@ public:\
  * Thhese omit the contents constructors, as they need unique parameters.
  */
 #define __GENSUDOKUBOARD_POPULATOR_GENERIC_CONSTRUCTORS(classname) \
-public:\
     __GENSUDOKUBOARD_POPULATOR_TYPE_ALIASES \
     __GENSUDOKUBOARD_POPULATOR_STANDARD_CONSTRUCTORS(classname)

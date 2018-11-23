@@ -32,6 +32,7 @@ namespace vorpal::gensudoku {
         // The probability in mutating a cell that can be mutated.
         const double prob_n;
 
+    public:
         __GENSUDOKUBOARD_POPULATOR_GENERIC_CONSTRUCTORS(GenSudokuBoardHCPopulator)
 
         explicit GenSudokuBoardHCPopulator(const data_type &partial_board, double prob_n = DEFAULT_N_PROBABILITY):

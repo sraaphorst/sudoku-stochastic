@@ -28,16 +28,8 @@ namespace vorpal::gensudoku {
             public virtual GenSudokuBoardPopulator<N>,
             public virtual stochastic::GeneticPopulator<GenSudokuBoard<N>> {
 
+    public:
         __GENSUDOKUBOARD_POPULATOR_CONSTRUCTORS(GenSudokuBoardGAPopulator, GenSudokuBoardPopulator);
-
-//    public:
-//        using data_type = GenSudokuBoard<N>;
-//        using pointer_type = std::unique_ptr<data_type>;
-//
-//        GenSudokuBoardGAPopulator() = delete;
-//        explicit GenSudokuBoardGAPopulator(const data_type &partial_board): GenSudokuBoardPopulator<N>{partial_board} {}
-//        explicit GenSudokuBoardGAPopulator(data_type &&partial_board): GenSudokuBoardPopulator<N>{partial_board} {}
-
 
         /**
          * Generate a random board from the partial board this class was initialized it.
