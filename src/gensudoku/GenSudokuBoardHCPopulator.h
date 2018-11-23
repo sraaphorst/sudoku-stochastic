@@ -40,27 +40,29 @@ namespace vorpal::gensudoku {
         explicit GenSudokuBoardHCPopulator(data_type &&partial_board, double prob_n = DEFAULT_N_PROBABILITY):
             GenSudokuBoardPopulator<N>{partial_board}, prob_n{prob_n} {}
 
-//        pointer_type generate() noexcept override {
-//            auto board = std::make_unique<GenSudokuBoard<N>>(this->partial_board);
-//
-//            // Fill the empty slots on the board with any valid number.
-//            auto &gen = stochastic::RNG::getGenerator();
-//
-//            for (size_t pos = 0; pos < NN; ++pos) {
-//                const auto value = std::uniform_int_distribution<size_t>(0, this->cell_candidates.size() - 1)(gen);
-//                (*board)[pos] = value;
-//            }
-//
-//            return board;
-//        }
-
         pointer_type generate() noexcept override {
-            // For each row, shuffle the missing entries and distribute them amongst the empty positions.
             auto board = std::make_unique<GenSudokuBoard<N>>(this->partial_board);
-            for (size_t row = 0; row < NN; ++row)
-                this->fillRow(board, row);
-            return std::move(board);
+
+            // Fill the empty slots on the board with any valid number.
+            auto &gen = stochastic::RNG::getGenerator();
+
+            for (size_t pos = 0; pos < BoardSize; ++pos) {
+                if ((*board)[pos] == 0) {
+                    const auto value = std::uniform_int_distribution<size_t>(0, this->cell_candidates[pos].size() - 1)(gen);
+                    (*board)[pos] = this->cell_candidates[pos][value];
+                }
+            }
+
+            return board;
         }
+
+//        pointer_type generate() noexcept override {
+//            // For each row, shuffle the missing entries and distribute them amongst the empty positions.
+//            auto board = std::make_unique<GenSudokuBoard<N>>(this->partial_board);
+//            for (size_t row = 0; row < NN; ++row)
+//                this->fillRow(board, row);
+//            return std::move(board);
+//        }
 
         virtual pointer_type selectedNeighbour(int iteration, pointer_type &current) const override {
             auto neighbour = std::move(nOperator(current));
@@ -75,11 +77,6 @@ namespace vorpal::gensudoku {
             auto &gen = stochastic::RNG::getGenerator();
             std::uniform_real_distribution<> distribution;
 
-            for (int i = 0; i < 9; ++i) {
-                for (int j = 0; j < 9; ++j)
-                    std::cerr << (*current_board)[i * 9 + j] << ' ';
-                std::cerr << '\n';
-            }
             // Mutate current by the N-operator, which runs a probability check for every non-fixed cell.
             // If the probability check succeeds, it attempts to decreatse or increase the value of the cel
             // by a jump.

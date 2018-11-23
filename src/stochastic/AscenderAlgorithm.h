@@ -54,24 +54,20 @@ namespace vorpal::stochastic {
             for (uint64_t round = 0; round < options.max_rounds; ++round) {
                 // Create the original candidate.
                 pointer_type candidate = std::move(options.populator->generate());
-                std::cerr << "CREATED CANDIDATE:\n";
-                for (int i = 0; i < 81; ++i) {
-                        std::cerr << (*candidate)[i];
-                }
-                std::cerr << '\n';
 
                 for (uint64_t iteration = 0; iteration < options.max_iterations_per_round; ++iteration) {
                     // Move to the neighbour.
                     candidate = std::move(options.populator->selectedNeighbour(iteration, candidate));
-
                     if (candidate->fitness() >= options.fitness_success_threshold) {
                         std::cerr << "Solved in round " << round << " at iteration " << iteration;
                         return candidate;
                     }
                 }
 
-                if (!best || best->fitness() < candidate->fitness())
+                if (!best || best->fitness() < candidate->fitness()) {
                     best = std::move(candidate);
+                    std::cerr << "Best: " << best->fitness() << '\n';
+                }
             }
 
             // If we reach this point, we fail. Return the best solution found thus far.

@@ -87,8 +87,6 @@ namespace vorpal::gensudoku {
             auto &gen = stochastic::RNG::getGenerator();
             for (;;) {
                 std::vector<size_t> &entries = rowMissingEntries[row];
-                std::cerr << "Entries has size " << rowMissingEntries.size() << '\n';
-                std::cerr << "EntriesEntries has size " << rowMissingEntries[row].size() << '\n';
                 std::shuffle(std::begin(entries), std::end(entries), gen);
 
                 bool flag = true;
