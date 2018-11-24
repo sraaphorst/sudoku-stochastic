@@ -67,7 +67,7 @@ namespace vorpal::gensudoku {
          * Generate a random board from the partial board this class was initialized it.
          * @return a random board
          */
-        pointer_type generate() noexcept override {
+        virtual pointer_type generate() noexcept override {
             // For each row, shuffle the missing entries and distribute them amongst the empty positions.
             auto board = std::make_unique<GenSudokuBoard<N>>(this->partial_board);
 
