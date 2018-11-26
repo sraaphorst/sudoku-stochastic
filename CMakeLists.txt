@@ -10,8 +10,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -O3")
 # Find includes in corresponding build directories.
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-find_package(Boost 1.67 COMPONENTS serialization REQUIRED)
+add_definitions(-DBOOST_LOG_DYN_LINK)
+find_package(Boost 1.68 COMPONENTS program_options REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
+link_directories(${Boost_LIBRARY_DIRS})
 
 include_directories(
         ${PROJECT_SOURCE_DIR}/src

@@ -30,7 +30,7 @@ namespace vorpal::stochastic {
             std::unique_ptr<AscenderPopulator<T>> populator = nullptr;
 
             // The maximum number of iterations before the hill climber resets.
-            uint64_t max_iterations_per_round = 2000;
+            uint64_t max_iterations_per_round = 200'000;
 
             // The maximum number of rounds before the problem gives up.
             uint64_t max_rounds = UINT64_MAX;
@@ -59,7 +59,7 @@ namespace vorpal::stochastic {
                     // Move to the neighbour.
                     candidate = std::move(options.populator->selectedNeighbour(iteration, candidate));
                     if (candidate->fitness() >= options.fitness_success_threshold) {
-                        std::cerr << "Solved in round " << round << " at iteration " << iteration;
+                        std::cerr << "Solved in round " << round << " at iteration " << iteration << '\n';
                         return candidate;
                     }
                 }

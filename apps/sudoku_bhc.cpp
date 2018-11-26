@@ -1,5 +1,5 @@
 /**
- * sudoku_hc.cpp
+ * sudoku_bhc.cpp
  *
  * By Sebastian Raaphorst, 2018.
  */
@@ -8,7 +8,7 @@
 #include <memory>
 
 #include <GenSudokuBoard.h>
-#include <GenSudokuBoardHCPopulator.h>
+#include <GenSudokuBoardBHCPopulator.h>
 #include <AscenderAlgorithm.h>
 #include <PredefinedBoards.h>
 
@@ -22,8 +22,9 @@ int main() {
         // Configure the solver.
         using solver = AscenderAlgorithm<SudokuBoard, size_t>;
         solver::Options options;
-//        options.populator = std::make_unique<SudokuBoardHCPopulator>(PredefinedBoards::benchmark_board);
-        options.populator = std::make_unique<SudokuBoardHCPopulator>(PredefinedBoards::easy_board);
+//        options.populator = std::make_unique<SudokuBoardBHCPopulator>(PredefinedBoards::impossible_board, 0.3, 0.5);
+//        options.populator = std::make_unique<SudokuBoardBHCPopulator>(PredefinedBoards::benchmark_board, 0.3, 0.5);
+        options.populator = std::make_unique<SudokuBoardBHCPopulator>(PredefinedBoards::easy_board);
         options.fitness_success_threshold = SudokuBoard::PerfectFitness;
 
         const auto &sol = solver::run(options);

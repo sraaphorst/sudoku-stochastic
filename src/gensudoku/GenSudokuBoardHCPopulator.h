@@ -44,25 +44,28 @@ namespace vorpal::gensudoku {
         explicit GenSudokuBoardHCPopulator(data_type &&partial_board, double prob_n = DEFAULT_N_PROBABILITY):
             GenSudokuBoardPopulator<N>{std::forward<data_type&&>(partial_board)}, prob_n{prob_n} {}
 
-//        pointer_type generate() noexcept override {
-//            auto board = std::make_unique<GenSudokuBoard<N>>(this->partial_board);
-//
-//            // Fill the empty slots on the board with any valid number.
-//            auto &gen = stochastic::RNG::getGenerator();
-//
-//            for (size_t pos = 0; pos < BoardSize; ++pos) {
-//                if ((*board)[pos] == 0) {
-//                    const auto value = std::uniform_int_distribution<size_t>(0, this->cell_candidates[pos].size() - 1)(gen);
-//                    (*board)[pos] = this->cell_candidates[pos][value];
-//                }
-//            }
-//
-//            return board;
-//        }
-
+        // Enabling this uses the approach used in:
+        // M. A. Al-Betar, M. A. Awadallah, A. L. Bolaji and B. O. Alijla, $\beta$-Hill Climbing Algorithm for Sudoku Game.
         pointer_type generate() noexcept override {
-            return GenSudokuBoardPopulator<N>::generate();
+            auto board = std::make_unique<GenSudokuBoard<N>>(this->partial_board);
+
+            // Fill the empty slots on the board with any valid number.
+            auto &gen = stochastic::RNG::getGenerator();
+
+            for (size_t pos = 0; pos < BoardSize; ++pos) {
+                if ((*board)[pos] == 0) {
+                    const auto value = std::uniform_int_distribution<size_t>(0, this->cell_candidates[pos].size() - 1)(gen);
+                    (*board)[pos] = this->cell_candidates[pos][value];
+                }
+            }
+
+            return board;
         }
+
+        // Enabling this uses the same strategy as the row-filling of the genetic algorithm.
+//        pointer_type generate() noexcept override {
+//            return GenSudokuBoardPopulator<N>::generate();
+//        }
 
         virtual pointer_type selectedNeighbour(int iteration, pointer_type &current) const override {
             auto neighbour = std::move(nOperator(current));
@@ -72,14 +75,14 @@ namespace vorpal::gensudoku {
                 return std::move(current);
         }
 
-    private:
+    protected:
         pointer_type nOperator(const pointer_type &current_board) const {
             auto &gen = stochastic::RNG::getGenerator();
             std::uniform_real_distribution<> distribution;
 
             // Mutate current by the N-operator, which runs a probability check for every non-fixed cell.
-            // If the probability check succeeds, it attempts to decreatse or increase the value of the cel
-            // by a jump.
+            // If the probability check succeeds, it attempts to decrease or increase the value of the cell
+            // by a single jump.
             pointer_type neighbour_board = std::make_unique<data_type>(*current_board);
 
             for (size_t pos = 0; pos < BoardSize; ++pos) {
@@ -104,14 +107,3 @@ namespace vorpal::gensudoku {
 
     using SudokuBoardHCPopulator = GenSudokuBoardHCPopulator<>;
 }
-/**
- * A modification of a hill climbing algorithm as discovered by:
- *
- * Mohammed Azmi Al-Betar. 2017. $\beta$-Hill climbing: an exploratory local search.
- * Neural Computing and Applications 28, 1 (January 2017), pp. 153-168.
- *
- * M. A. Al-Betar, M. A. Awadallah, A. L. Bolaji and B. O. Alijla, $\beta$-Hill Climbing Algorithm for Sudoku Game.
- * 2017 Palestinian International Conference on Information and Communication Technology (PICICT), Gaza, Palestine, 2017, pp. 84-88.
- *
- * Note that by omitting the beta-function, a regular hill climber is achieved.
- */

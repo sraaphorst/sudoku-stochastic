@@ -36,11 +36,11 @@ namespace vorpal::stochastic {
             std::unique_ptr<GeneticPopulator<T>> populator = nullptr;
 
             // The  population size of each generation.
-            size_t population_size = 2000;
+            size_t population_size = 2'000;
 
             // The maximum number of generations to run.
             // Default: as many as possible.
-            uint64_t max_generations = UINT64_MAX;
+            uint64_t max_generations = 100'000'000;
 
             // The probability that two candidates will breed.
             double crossover_probability = 0.3;
