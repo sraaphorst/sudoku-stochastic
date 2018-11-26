@@ -1,15 +1,20 @@
 # sudoku_stochastic
 
-**Current stats:** Complete, but with further addons planned.
+**Current stats:** In progress.
 
-This is another technique to attempt to solve Sudoku boards using stochastic algorithms. Note that we do not limit to 3^2 x 3^2 = 9 x 9 boards, but allow for any positive integer n and n^2 x n^2 boards.
+This is another technique to attempt to solve Sudoku boards using stochastic algorithms. Note that we do not limit to 3^2 x 3^2 = 9 x 9 boards, but allow for any positive integer n and n^2 x n^2 boards. (The command-line apps, however, limit to standard Sudoku boards.)
 
-In the current omplementation, the focus is on a genetic algorithm that I wrote. The primary purpose of this project is:
+The current implementation offers the current types of algorithms to find solutions to Sudoku puzzles:
+1. Genetic algorithm
+2. Hill climbing
+3. β-Hill climbing
 
-1. To implement a genetic algorithm in C++;
-2. To compare the efficiency with brute-force backtracking, exact cover, and constraint programming;
-3. To gain more experience with `std::unique_ptr` and move its necessary move semantics, since I had seldom worked with them in the past; and
-4. To experiment with OpenMP for parallelization.
+My primary goals in this project were to:
+
+1. Implement a genetic algorithm in C++;
+2. Compare the efficiency with brute-force backtracking, exact cover, and constraint programming;
+3. Gain more experience with `std::unique_ptr` and move its necessary move semantics, since I had seldom worked with them in the past; and
+4. Experiment with OpenMP for parallelization.
 
 ## Formulation ##
 
@@ -49,7 +54,7 @@ The second was achievd with using extreme values for all parameters, and was sol
 
 ## Conclusion ##
 
-Despite the artifact with regards to Sudoku solving is far from ideal, the following goals have been accomplished:
+Despite the artifact with regards to Sudoku solving being far from ideal, the following goals have been accomplished:
 
 1. Generate a generic C++ genetic algorithm that can be used for any genetic algorithm purposes.
 2. Learn substantially more about `std::unique_ptr`, move semantics, and OpenMP.
@@ -58,19 +63,18 @@ Thus, in that sense, the project was a success.
 
 ## TODO ##
 
-The algorithm could use some statistical gathering, and I plan on getting rid of `assert` in lieu of using exceptions.
+At the moment, only the genetic algorithm offers command-line execution. This should be extended to the other heuristics as well.
 
-I would like to examine in more detail how tweaking the parameters affects the likelihood of solution and algorithm speed.
-
-I would also like to see if I can solve the "notoriously hardest puzzle:"
+I would like to see if I can solve the "notoriously hardest puzzle:"
 
 `800000000003600000070090200050007000000045700000100030001000068008500010090000400`
 
-Finally, I would like to add generic C++ implementations of:
+Finally, I would like to add generic C++ implementations of the following algorithms:
 
-1. Hill climbing;
-2. Simulated annealing;
-3. Tabu search; and
-4. The Great Deluge algorithm (to which I am particularly partial).
+1. Simulated annealing;
+2. Tabu search; and
+3. The Great Deluge algorithm (to which I am particularly partial).
+
+The `AscenderAlgorithm` class allows this with ease.
 
 Thus, the final product will be a number of search-based algorithms that can be used for a wide range of problems.
