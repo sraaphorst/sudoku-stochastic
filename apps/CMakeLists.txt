@@ -9,3 +9,6 @@ target_link_libraries(sudoku_hc PRIVATE stochastic OpenMP::OpenMP_CXX)
 
 add_executable(sudoku_bhc sudoku_bhc.cpp)
 target_link_libraries(sudoku_bhc PRIVATE stochastic OpenMP::OpenMP_CXX)
+
+add_executable(sudoku_gd sudoku_gd.cpp)
+target_link_libraries(sudoku_gd PRIVATE stochastic OpenMP::OpenMP_CXX)

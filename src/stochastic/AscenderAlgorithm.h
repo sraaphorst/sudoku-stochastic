@@ -29,7 +29,8 @@ namespace vorpal::stochastic {
         struct Options {
             std::unique_ptr<AscenderPopulator<T>> populator = nullptr;
 
-            // The maximum number of iterations before the hill climber resets.
+            // The maximum number of iterations before the ascender resets.
+            // This is analogous to hill climnbing starting over, or the great deluge deciding to stop.
             uint64_t max_iterations_per_round = 200'000;
 
             // The maximum number of rounds before the problem gives up.
@@ -56,17 +57,17 @@ namespace vorpal::stochastic {
                 pointer_type candidate = std::move(options.populator->generate());
 
                 for (uint64_t iteration = 0; iteration < options.max_iterations_per_round; ++iteration) {
-                    // Move to the neighbour.
+                    // Move to the neighbour, even if of lower fitness.
                     candidate = std::move(options.populator->selectedNeighbour(iteration, candidate));
                     if (candidate->fitness() >= options.fitness_success_threshold) {
                         std::cerr << "Solved in round " << round << " at iteration " << iteration << '\n';
                         return candidate;
                     }
-                }
 
-                if (!best || best->fitness() < candidate->fitness()) {
-                    best = std::move(candidate);
-                    std::cerr << "Best: " << best->fitness() << '\n';
+                    if (!best || best->fitness() < candidate->fitness()) {
+                        best = std::make_unique<T>(*candidate);
+                        std::cerr << "Best: " << best->fitness() << '\n';
+                    }
                 }
             }
 

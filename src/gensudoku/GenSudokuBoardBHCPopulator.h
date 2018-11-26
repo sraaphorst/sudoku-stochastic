@@ -25,7 +25,7 @@ namespace vorpal::gensudoku {
     template<size_t N = 3,
             const auto NN = N * N,
             const auto BoardSize = NN * NN>
-    class GenSudokUBoardBHCPopulator:
+    class GenSudokuBoardBHCPopulator:
             public GenSudokuBoardHCPopulator<N> {
 
         // The probability in beta-mutating a cell that can be mutated.
@@ -34,19 +34,19 @@ namespace vorpal::gensudoku {
     public:
         constexpr static double DEFAULT_B_PROBABILITY = 0.5;
 
-        __GENSUDOKUBOARD_POPULATOR_GENERIC_CONSTRUCTORS(GenSudokUBoardBHCPopulator)
+        __GENSUDOKUBOARD_POPULATOR_GENERIC_CONSTRUCTORS(GenSudokuBoardBHCPopulator)
 
-        explicit GenSudokUBoardBHCPopulator(const data_type &partial_board,
+        explicit GenSudokuBoardBHCPopulator(const data_type &partial_board,
                 double prob_n = GenSudokuBoardHCPopulator<N>::DEFAULT_N_PROBABILITY,
                 double prob_b = DEFAULT_B_PROBABILITY):
                 GenSudokuBoardHCPopulator<N>{partial_board, prob_n}, prob_b{prob_b} {}
 
-        explicit GenSudokUBoardBHCPopulator(data_type &&partial_board,
+        explicit GenSudokuBoardBHCPopulator(data_type &&partial_board,
                 double prob_n = GenSudokuBoardHCPopulator<N>::DEFAULT_N_PROBABILITY,
                 double prob_b = DEFAULT_B_PROBABILITY):
                 GenSudokuBoardHCPopulator<N>{std::forward<data_type&&>(partial_board), prob_n}, prob_b{prob_b} {}
 
-        virtual pointer_type selectedNeighbour(int iteration, pointer_type &current) const override {
+        virtual pointer_type selectedNeighbour(int iteration, pointer_type &current) override {
             auto nneighbour = std::move(this->nOperator(current));
             auto bneighbour = std::move(bOperator(nneighbour));
             //std::cerr << "o=" << current->fitness() << ", n=" << nneighbour->fitness() << ", b=" << bneighbour->fitness() << '\n';
@@ -78,5 +78,5 @@ namespace vorpal::gensudoku {
         }
     };
 
-    using SudokuBoardBHCPopulator = GenSudokUBoardBHCPopulator<>;
+    using SudokuBoardBHCPopulator = GenSudokuBoardBHCPopulator<>;
 }
