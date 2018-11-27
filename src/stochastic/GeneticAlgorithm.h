@@ -108,7 +108,7 @@ namespace vorpal::stochastic {
                 //std::mutex crap;
                 /** Most of the work that can be easily parallelized is here, and propagates forward. **/
                 const size_t maxiters = options.population_size/2;
-                for (size_t i = 0; i < options.population_size/2; ++i) {
+                for (size_t i = 0; i < maxiters; ++i) {
                     // Crossover if probability dictates.
                     if (probabilityGenerator(gen) < options.crossover_probability) {
                         const size_t p0Idx = options.selector->select(prevGeneration);

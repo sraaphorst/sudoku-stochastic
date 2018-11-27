@@ -22,7 +22,7 @@ TEST_CASE("Create a board where every row is a permutation") {
                   "007008095"
                   "060090300"};
     REQUIRE(!b.isFull());
-    SudokuBoardPopulator filler{b};
+    SudokuBoardGAPopulator filler{b};
 
     for (int bnum = 0; bnum < 10'000; ++bnum) {
         const auto board = filler.generate();

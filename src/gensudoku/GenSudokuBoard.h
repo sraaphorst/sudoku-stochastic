@@ -58,7 +58,7 @@ namespace vorpal::gensudoku {
                 throw std::invalid_argument((boost::format("board must be represented by string of length %1%"
                                                           "(length %2% provided") % NN % sv.size()).str());
 
-            for (int i = 0; i < BoardSize; ++i)
+            for (size_t i = 0; i < BoardSize; ++i)
                 contents[i] = fromBase36(sv[i]);
         }
 
@@ -84,7 +84,7 @@ namespace vorpal::gensudoku {
         /**
          * Accessors.
          */
-        constexpr const size_t operator[](const std::pair<size_t, size_t> &pos) const noexcept {
+        constexpr size_t operator[](const std::pair<size_t, size_t> &pos) const noexcept {
             const auto [row, col] = pos;
             checkPosition(row, col);
             return contents[row * NN + col];
@@ -96,7 +96,7 @@ namespace vorpal::gensudoku {
             return contents[row * NN + col];
         }
 
-        constexpr const size_t operator[](size_t pos) const noexcept {
+        constexpr size_t operator[](size_t pos) const noexcept {
             checkPosition(pos);
             return contents[pos];
         }

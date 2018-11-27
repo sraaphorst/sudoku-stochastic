@@ -5,7 +5,8 @@ cmake_minimum_required(VERSION 3.12)
 project(sudoku_stochastic_top)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -O3")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -O3")
+add_compile_options(-Wall -Wextra -Wpedantic -std=c++17 -O3)
 
 # Find includes in corresponding build directories.
 set(CMAKE_INCLUDE_CURRENT_DIR ON)

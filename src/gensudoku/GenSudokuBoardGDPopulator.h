@@ -14,8 +14,8 @@ namespace vorpal::gensudoku {
             const auto BoardSize = NN * NN>
     class GenSudokuBoardGDPopulator final: public GenSudokuBoardHCPopulator<N> {
         // We allow these to be doubles so that we can work in units smaller than integral if we want.
-        double rain_speed;
         double water_level;
+        double rain_speed;
 
     public:
         __GENSUDOKUBOARD_POPULATOR_GENERIC_CONSTRUCTORS(GenSudokuBoardGDPopulator)
@@ -23,7 +23,7 @@ namespace vorpal::gensudoku {
         GenSudokuBoardGDPopulator(const data_type &partial_board, double water_level, double rain_speed):
             GenSudokuBoardHCPopulator<N>{partial_board}, water_level(water_level), rain_speed{rain_speed} {}
 
-        virtual pointer_type selectedNeighbour(int iteration, pointer_type &current) override {
+        virtual pointer_type selectedNeighbour(int, pointer_type &current) override {
             auto neighbour = std::move(this->nOperator(current));
 
             if (neighbour->fitness() > water_level) {

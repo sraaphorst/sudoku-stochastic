@@ -67,7 +67,7 @@ namespace vorpal::gensudoku {
 //            return GenSudokuBoardPopulator<N>::generate();
 //        }
 
-        virtual pointer_type selectedNeighbour(int iteration, pointer_type &current) override {
+        virtual pointer_type selectedNeighbour(int, pointer_type &current) override {
             auto neighbour = std::move(nOperator(current));
             if (neighbour->fitness() > current->fitness())
                 return std::move(neighbour);

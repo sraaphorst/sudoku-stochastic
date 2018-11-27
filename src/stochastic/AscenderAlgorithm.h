@@ -47,8 +47,6 @@ namespace vorpal::stochastic {
             if (options.populator == nullptr)
                 throw std::invalid_argument("must set an AscenderPopulator");
 
-            auto &gen = RNG::getGenerator();
-
             // Keep track of the best candidate seen so far.
             pointer_type best = nullptr;
 

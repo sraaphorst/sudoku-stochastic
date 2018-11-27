@@ -81,14 +81,14 @@ namespace vorpal::gensudoku {
             auto &gen = stochastic::RNG::getGenerator();
             std::uniform_int_distribution distribution{0, 1};
 
-            for (int i = 0; i < NN; ++i) {
+            for (size_t i = 0; i < NN; ++i) {
                 if (distribution(gen) == 0) {
-                    for (int j = 0; j < NN; ++j) {
+                    for (size_t j = 0; j < NN; ++j) {
                         (*c0)[i * NN + j] = p0->contents[i * NN + j];
                         (*c1)[i * NN + j] = p1->contents[i * NN + j];
                     }
                 } else {
-                    for (int j = 0; j < NN; ++j) {
+                    for (size_t j = 0; j < NN; ++j) {
                         (*c0)[i * NN + j] = p1->contents[i * NN + j];
                         (*c1)[i * NN + j] = p0->contents[i * NN + j];
                     }

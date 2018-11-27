@@ -176,4 +176,6 @@ namespace vorpal::gensudoku {
             }
         }
     };
+
+    using SudokuBoardPopulator = GenSudokuBoardPopulator<>;
 }

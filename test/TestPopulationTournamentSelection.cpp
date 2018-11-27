@@ -11,7 +11,7 @@
 
 #include "PopulationSelector.h"
 #include "GenSudokuBoard.h"
-#include "GenSudokuBoardGAPopulator.h"
+#include "GenSudokuBoardPopulator.h"
 
 using namespace vorpal::gensudoku;
 using namespace vorpal::stochastic;
@@ -32,7 +32,7 @@ TEST_CASE("Choose a population of size k") {
 
     SudokuBoardPopulator filler{b};
     std::vector<std::unique_ptr<SudokuBoard>> sudokus;
-    for (int i = 0; i < NumBoards; ++i)
+    for (size_t i = 0; i < NumBoards; ++i)
         sudokus.emplace_back(filler.generate());
 
     const KTournamentSelector<SudokuBoard> selector{5};
