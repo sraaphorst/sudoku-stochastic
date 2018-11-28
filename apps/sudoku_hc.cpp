@@ -8,8 +8,8 @@
 #include <memory>
 
 #include <GenSudokuBoard.h>
-#include <GenSudokuBoardHCPopulator.h>
-#include <HillClimbingPopulator.h>
+#include <GenSudokuBoardAscenderPopulator.h>
+#include <AscenderPopulator.h>
 #include <HillClimbingAlgorithm.h>
 #include <PredefinedBoards.h>
 
@@ -23,7 +23,7 @@ int main() {
         // Configure the solver.
         using solver = HillClimbingAlgorithm<SudokuBoard, size_t>;
         solver::option_type options;
-        options.populator = std::make_unique<SudokuBoardHCPopulator>(PredefinedBoards::benchmark_board);
+        options.populator = std::make_unique<SudokuBoardAscenderPopulator>(PredefinedBoards::benchmark_board);
         options.fitness_success_threshold = SudokuBoard::PerfectFitness;
 
         const auto sol = solver{}.run(options);

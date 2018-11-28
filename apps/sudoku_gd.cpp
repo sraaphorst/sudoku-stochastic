@@ -8,7 +8,7 @@
 #include <memory>
 
 #include <GenSudokuBoard.h>
-#include <GenSudokuBoardHCPopulator.h>
+#include <GenSudokuBoardAscenderPopulator.h>
 #include <GreatDelugeAlgorithm.h>
 #include <PredefinedBoards.h>
 
@@ -22,7 +22,7 @@ int main() {
         // Configure the solver.
         using solver = GreatDelugeAlgorithm<SudokuBoard>;
         solver::option_type options;
-        options.populator = std::make_unique<SudokuBoardHCPopulator>(PredefinedBoards::very_easy_board);
+        options.populator = std::make_unique<SudokuBoardAscenderPopulator>(PredefinedBoards::very_easy_board);
         options.fitness_success_threshold = SudokuBoard::PerfectFitness;
         options.initial_water_level = 100;
         options.rain_speed = 0.1;

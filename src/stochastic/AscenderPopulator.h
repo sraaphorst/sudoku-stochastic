@@ -10,12 +10,12 @@
 
 namespace vorpal::stochastic {
     template<typename T>
-    class HillClimbingPopulator: public Populator<T> {
+    class AscenderPopulator: public Populator<T> {
     protected:
-        HillClimbingPopulator() = default;
+        AscenderPopulator() = default;
 
     public:
-        virtual ~HillClimbingPopulator() = default;
+        virtual ~AscenderPopulator() = default;
 
         using pointer_type = std::unique_ptr<T>;
 

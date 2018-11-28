@@ -12,7 +12,7 @@
 #include <type_traits>
 #include <vector>
 
-#include "HillClimbingPopulator.h"
+#include "AscenderPopulator.h"
 #include "RNG.h"
 
 namespace vorpal::stochastic {
@@ -20,7 +20,7 @@ namespace vorpal::stochastic {
     struct HillClimbingOptions {
         static_assert(std::is_arithmetic_v<Fitness>);
 
-        using populator_type = HillClimbingPopulator<T>;
+        using populator_type = AscenderPopulator<T>;
 
         std::unique_ptr<populator_type> populator = nullptr;
 
@@ -60,7 +60,7 @@ namespace vorpal::stochastic {
         pointer_type run(Opts &&options) {
             // Verify correct input.
             if (options.populator == nullptr)
-                throw std::invalid_argument("must set an HillClimbingPopulator");
+                throw std::invalid_argument("must set an AscenderPopulator");
 
             // Keep track of the best candidate seen so far.
             pointer_type best = nullptr;

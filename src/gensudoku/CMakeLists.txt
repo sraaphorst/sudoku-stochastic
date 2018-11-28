@@ -8,7 +8,7 @@ project(gensudoku VERSION 0.1.0 LANGUAGES CXX)
 #        DefaultMethods.h
 #        GenSudokuBoard.h
 #        GenSudokuBoardGAPopulator.h
-#        GenSudokuBoardHCPopulator.h
+#        GenSudokuBoardAscenderPopulator.h
 #        GenSudokuBoardPopulator.h
 #        PredefinedBoards.h
 #        )

@@ -12,7 +12,7 @@
 
 #include <boost/format.hpp>
 
-#include "HillClimbingPopulator.h"
+#include "AscenderPopulator.h"
 #include "DefaultMethods.h"
 #include "GenSudokuBoardPopulator.h"
 #include "Populator.h"
@@ -26,9 +26,9 @@ namespace vorpal::gensudoku {
     template<size_t N = 3,
             const auto NN = N * N,
             const auto BoardSize = NN  * NN>
-    class GenSudokuBoardHCPopulator:
+    class GenSudokuBoardAscenderPopulator:
             public GenSudokuBoardPopulator<N>,
-            public stochastic::HillClimbingPopulator<GenSudokuBoard<N>> {
+            public stochastic::AscenderPopulator<GenSudokuBoard<N>> {
 
         // The probability in mutating a cell that can be mutated.
         const double prob_n;
@@ -36,12 +36,12 @@ namespace vorpal::gensudoku {
     public:
         constexpr static double DEFAULT_N_PROBABILITY = 0.3;
 
-        __GENSUDOKUBOARD_POPULATOR_GENERIC_CONSTRUCTORS(GenSudokuBoardHCPopulator)
+        __GENSUDOKUBOARD_POPULATOR_GENERIC_CONSTRUCTORS(GenSudokuBoardAscenderPopulator)
 
-        explicit GenSudokuBoardHCPopulator(const data_type &partial_board, double prob_n = DEFAULT_N_PROBABILITY):
+        explicit GenSudokuBoardAscenderPopulator(const data_type &partial_board, double prob_n = DEFAULT_N_PROBABILITY):
             GenSudokuBoardPopulator<N>{partial_board}, prob_n{prob_n} {}
 
-        explicit GenSudokuBoardHCPopulator(data_type &&partial_board, double prob_n = DEFAULT_N_PROBABILITY):
+        explicit GenSudokuBoardAscenderPopulator(data_type &&partial_board, double prob_n = DEFAULT_N_PROBABILITY):
             GenSudokuBoardPopulator<N>{std::forward<data_type&&>(partial_board)}, prob_n{prob_n} {}
 
         // Enabling this uses the approach used in:
@@ -101,5 +101,5 @@ namespace vorpal::gensudoku {
         }
     };
 
-    using SudokuBoardHCPopulator = GenSudokuBoardHCPopulator<>;
+    using SudokuBoardAscenderPopulator = GenSudokuBoardAscenderPopulator<>;
 }

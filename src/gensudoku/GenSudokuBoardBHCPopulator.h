@@ -7,7 +7,7 @@
 #pragma once
 
 #include "DefaultMethods.h"
-#include "GenSudokuBoardHCPopulator.h"
+#include "GenSudokuBoardAscenderPopulator.h"
 #include "RNG.h"
 
 namespace vorpal::gensudoku {
@@ -26,7 +26,7 @@ namespace vorpal::gensudoku {
             const auto NN = N * N,
             const auto BoardSize = NN * NN>
     class GenSudokuBoardBHCPopulator:
-            public GenSudokuBoardHCPopulator<N> {
+            public GenSudokuBoardAscenderPopulator<N> {
 
         // The probability in beta-mutating a cell that can be mutated.
         const double prob_b;
@@ -37,14 +37,14 @@ namespace vorpal::gensudoku {
         __GENSUDOKUBOARD_POPULATOR_GENERIC_CONSTRUCTORS(GenSudokuBoardBHCPopulator)
 
         explicit GenSudokuBoardBHCPopulator(const data_type &partial_board,
-                double prob_n = GenSudokuBoardHCPopulator<N>::DEFAULT_N_PROBABILITY,
+                double prob_n = GenSudokuBoardAscenderPopulator<N>::DEFAULT_N_PROBABILITY,
                 double prob_b = DEFAULT_B_PROBABILITY):
-                GenSudokuBoardHCPopulator<N>{partial_board, prob_n}, prob_b{prob_b} {}
+                GenSudokuBoardAscenderPopulator<N>{partial_board, prob_n}, prob_b{prob_b} {}
 
         explicit GenSudokuBoardBHCPopulator(data_type &&partial_board,
-                double prob_n = GenSudokuBoardHCPopulator<N>::DEFAULT_N_PROBABILITY,
+                double prob_n = GenSudokuBoardAscenderPopulator<N>::DEFAULT_N_PROBABILITY,
                 double prob_b = DEFAULT_B_PROBABILITY):
-                GenSudokuBoardHCPopulator<N>{std::forward<data_type&&>(partial_board), prob_n}, prob_b{prob_b} {}
+                GenSudokuBoardAscenderPopulator<N>{std::forward<data_type&&>(partial_board), prob_n}, prob_b{prob_b} {}
 
         virtual pointer_type generateNeighbour(pointer_type &cur) override {
             return bOperator(this->nOperator(cur));
