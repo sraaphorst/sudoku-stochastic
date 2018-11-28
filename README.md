@@ -52,6 +52,8 @@ https://www.researchgate.net/publication/319886025_b-Hill_Climbing_Algorithm_for
 
 `050306007000085024098420603901003206030000010507260908405090380010570002800104070`
 
+Furthermore, I failed to see any advantage of β-hill climbing over heuristics other than vanilla hill climbing.
+
 However, this board is incredibly simple. As the difficulty increases, the probability of solving drops off sharply. The algorithms struggled to solve this Sudoku board, classified as easy:
 
 `870090230000003010004281000040809603090060040308704090000527100010900000027040085`
