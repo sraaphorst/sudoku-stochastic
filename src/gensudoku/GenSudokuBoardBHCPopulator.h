@@ -46,15 +46,8 @@ namespace vorpal::gensudoku {
                 double prob_b = DEFAULT_B_PROBABILITY):
                 GenSudokuBoardHCPopulator<N>{std::forward<data_type&&>(partial_board), prob_n}, prob_b{prob_b} {}
 
-        virtual pointer_type selectedNeighbour(int, pointer_type &current) override {
-            auto nneighbour = std::move(this->nOperator(current));
-            auto bneighbour = std::move(bOperator(nneighbour));
-            //std::cerr << "o=" << current->fitness() << ", n=" << nneighbour->fitness() << ", b=" << bneighbour->fitness() << '\n';
-
-            if (bneighbour->fitness() > current->fitness())
-                return std::move(bneighbour);
-            else
-                return std::move(current);
+        virtual pointer_type generateNeighbour(pointer_type &cur) override {
+            return bOperator(this->nOperator(cur));
         }
 
     private:

@@ -12,7 +12,7 @@
 
 #include <boost/format.hpp>
 
-#include "AscenderPopulator.h"
+#include "HillClimbingPopulator.h"
 #include "DefaultMethods.h"
 #include "GenSudokuBoardPopulator.h"
 #include "Populator.h"
@@ -28,7 +28,7 @@ namespace vorpal::gensudoku {
             const auto BoardSize = NN  * NN>
     class GenSudokuBoardHCPopulator:
             public GenSudokuBoardPopulator<N>,
-            public stochastic::AscenderPopulator<GenSudokuBoard<N>> {
+            public stochastic::HillClimbingPopulator<GenSudokuBoard<N>> {
 
         // The probability in mutating a cell that can be mutated.
         const double prob_n;
@@ -67,12 +67,8 @@ namespace vorpal::gensudoku {
 //            return GenSudokuBoardPopulator<N>::generate();
 //        }
 
-        virtual pointer_type selectedNeighbour(int, pointer_type &current) override {
-            auto neighbour = std::move(nOperator(current));
-            if (neighbour->fitness() > current->fitness())
-                return std::move(neighbour);
-            else
-                return std::move(current);
+        virtual pointer_type generateNeighbour(pointer_type &current) override {
+            return nOperator(current);
         }
 
     protected:
