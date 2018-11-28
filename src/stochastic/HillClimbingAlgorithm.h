@@ -70,11 +70,11 @@ namespace vorpal::stochastic {
                 auto state = initState(options);
 
                 // Create the original candidate.
-                pointer_type cur = std::move(options.populator->generate());
+                pointer_type cur = options.populator->generate();
 
                 for (uint64_t iteration = 0; iteration < options.max_iterations_per_round; ++iteration) {
                     // Get the next candidate and determine if we should move to it.
-                    pointer_type next = std::move(options.populator->generateNeighbour(cur));
+                    pointer_type next = options.populator->generateNeighbour(cur);
                     if (accept(next, cur, options, state))
                         cur = std::move(next);
 
