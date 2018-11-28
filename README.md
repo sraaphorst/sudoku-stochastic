@@ -47,6 +47,7 @@ This confirms other documnted online attempts to solve Sudoku boards using genet
 We represent a Sudoku board as a string of length 81 where 0 indicates an empty cell.
 
 All of the heuristics are able to solve this benchmark board, as provided in:
+
 https://www.researchgate.net/publication/319886025_b-Hill_Climbing_Algorithm_for_Sudoku_Game
 
 `050306007000085024098420603901003206030000010507260908405090380010570002800104070`
@@ -56,6 +57,7 @@ However, this board is incredibly simple. As the difficulty increases, the proba
 `870090230000003010004281000040809603090060040308704090000527100010900000027040085`
 
 The notoriously difficult Sudoku board, as provided in:
+
 https://www.telegraph.co.uk/news/science/science-news/9359579/Worlds-hardest-sudoku-can-you-crack-it.html
 
 `800000000003600000070090200050007000000045700000100030001000068008500010090000400`
