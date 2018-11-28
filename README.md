@@ -13,7 +13,7 @@ The current implementation offers the current types of algorithms to find soluti
 
 My primary goals in this project were to:
 
-1. Implement a genetic algorithm in C++;
+1. Implement a genetic algorithm and other reusable heuristic algorithms in C++;
 2. Compare the efficiency with brute-force backtracking, exact cover, and constraint programming;
 3. Gain more experience with `std::unique_ptr` and move its necessary move semantics, since I had seldom worked with them in the past; and
 4. Experiment with OpenMP for parallelization.
