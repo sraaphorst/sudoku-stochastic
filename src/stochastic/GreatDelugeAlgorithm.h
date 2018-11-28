@@ -6,12 +6,21 @@
 
 #pragma once
 
+#include <memory>
 #include <type_traits>
 
-#include "GreatDelugeOptions.h"
 #include "HillClimbingAlgorithm.h"
 
 namespace vorpal::stochastic {
+    template<typename T,
+            typename W = double,
+            typename Fitness = size_t>
+    struct GreatDelugeOptions: HillClimbingOptions<T, Fitness> {
+        static_assert(std::is_arithmetic_v<W>);
+        W initial_water_level;
+        W rain_speed;
+    };
+
     namespace details {
         template<typename W = double>
         struct GreatDelugeState {
@@ -43,7 +52,7 @@ namespace vorpal::stochastic {
         /**
          * Create a new state with the water level initialized from the options.
          */
-        virtual std::unique_ptr<state_type> initState(const option_type &options) override {
+        std::unique_ptr<state_type> initState(const option_type &options) override {
             auto state = std::make_unique<state_type>();
             state->water_level = options.initial_water_level;
             return state;
@@ -53,7 +62,7 @@ namespace vorpal::stochastic {
          * In the Great Deluge, we proceed as long as we are still above the water level.
          * If we proceed, it rains and the water level increases.
          */
-        virtual bool accept(const pointer_type &next, const pointer_type&,
+        bool accept(const pointer_type &next, const pointer_type&,
                 const option_type &options, std::unique_ptr<state_type> &state) override {
             if (next->fitness() > state->water_level) {
                 state->water_level += options.rain_speed;

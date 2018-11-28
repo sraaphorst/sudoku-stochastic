@@ -7,7 +7,6 @@
 #pragma once
 
 #include "HillClimbingAlgorithm.h"
-#include "HillClimbingOptions.h"
 
 namespace vorpal::stochastic {
     template<typename T,

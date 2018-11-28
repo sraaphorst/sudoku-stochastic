@@ -74,10 +74,10 @@ namespace vorpal::gensudoku {
 
         constexpr GenSudokuBoard &operator=(const GenSudokuBoard&) noexcept = default;
 
-        constexpr bool operator==(const GenSudokuBoard &other) noexcept {
+        constexpr bool operator==(const GenSudokuBoard &other) const noexcept {
             return contents == other.contents;
         };
-        constexpr bool operator!=(const GenSudokuBoard &other) noexcept {
+        constexpr bool operator!=(const GenSudokuBoard &other) const noexcept {
             return !(*this == other);
         };
 
