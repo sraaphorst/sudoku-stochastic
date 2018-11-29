@@ -10,6 +10,7 @@ The current implementation offers the current types of algorithms to find soluti
 3. β-Hill climbing
 4. Great deluge algorithm
 5. Tabu search algorithm
+6. Simulated annealing algorithm
 
 My primary goals in this project were to:
 
@@ -34,13 +35,13 @@ My primary goals in this project were to:
 
 ## Experimental Results ##
 
-Genetic algorithms are a very poor tool to use to solve Sudoku of any substantial difficulty. While exact cover and constraint programming can (and will) solve any Sudoku board - regardless of difficulty - in a fraction of a millisecond, the genetic algorithm - even if it does find a solution - finds one incredibly slowly.
+Genetic algorithms are a very poor tool to use to solve Sudoku of any substantial difficulty. While exact cover and constraint programming can (and will) solve any Sudoku board - regardless of difficulty - in a fraction of a millisecond, the genetic algorithm - even if it does find a solution - finds one slowly.
 
-This is because genetic algorithms are search heuristics. For a given Sudoku board search space with many empty cells, there are many local maximums; this, it is very easy for the genetic algorithm to get stuck and have trouble escaping local maximums to find the single (assuming the board is legitimate) global maximum.
+Out of the provided heuristics, however, the genetic algorithm is the only one who can reliably solve not only the `easy_board` candidate, but the `medium_board` as well: the other heuristics can solve the `very_easy` board, but struggle with the `easy_board`.
+
+This is largely due to the search space for Sudoku. For a given Sudoku board search space with many empty cells, there are many local maximums; this, it is very easy for a heuristic algorithm to get stuck and have trouble escaping local maximums to find the single (assuming the board is legitimate) global maximum.
 
 Heuristic algorithms also tend to have many parameters, and tweaking them is difficult: sometimes they seem board-dependent.
-
-This confirms other documnted online attempts to solve Sudoku boards using genetic algorithms.
 
 ## Example ##
 
@@ -83,6 +84,4 @@ At the moment, only the genetic algorithm offers command-line execution. This sh
 
 Additionally, statistics and proper logging need to be added.
 
-Finally, I would like to add generic C++ implementations of the following (maintained) list of algorithms and find new candidates for this list:
-
-* Simulated annealing.
+Finally, I would like to add other generic C++ heuristic algorithms to the list that can be used to solve Sudoku and compare them.
