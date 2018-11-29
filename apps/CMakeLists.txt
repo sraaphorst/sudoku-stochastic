@@ -15,3 +15,6 @@ target_link_libraries(sudoku_gd PRIVATE stochastic)
 
 add_executable(sudoku_ts sudoku_ts.cpp)
 target_link_libraries(sudoku_ts PRIVATE stochastic)
+
+add_executable(sudoku_sa sudoku_sa.cpp)
+target_link_libraries(sudoku_sa PRIVATE stochastic)

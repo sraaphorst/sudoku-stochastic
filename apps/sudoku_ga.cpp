@@ -39,10 +39,10 @@ double must_be_01(const po::variables_map &vm, const char * const opt) {
 
 int main(int argc, const char *argv[]) {
     using solver = GeneticAlgorithm<SudokuBoard, size_t>;
-    solver::Options options;
+    solver::options_type options;
 
     try {
-        po::options_description desc{"Options"};
+        po::options_description desc{"options_type"};
         desc.add_options()
                 ("help,h", "Display help information")
                 ("population-size,P", po::value<size_t>()->default_value(options.population_size), "Size of population")
@@ -86,7 +86,7 @@ int main(int argc, const char *argv[]) {
         // Try to get the board.
         std::vector<std::string> board_vec = vm.count("board") ? vm["board"].as<std::vector<std::string>>() :
                 std::vector<std::string>{};
-        std::string board_str = board_vec.empty() ? "benchmark_board" : board_vec[0];
+        std::string board_str = board_vec.empty() ? "benchhmark_board" : board_vec[0];
 
         std::optional<SudokuBoard> board = PredefinedBoards::lookupBoard(board_str);
         options.populator = std::make_unique<SudokuBoardGAPopulator>(board ?

@@ -30,7 +30,7 @@ namespace vorpal::stochastic {
 
         GeneticAlgorithm() = delete;
 
-        struct Options {
+        struct options_type {
             // The populator that handles actions such as mutations, crossovers, and generating random candidates.
             // MUST be set for the algorithm to function.
             std::unique_ptr<GeneticPopulator<T>> populator = nullptr;
@@ -67,7 +67,7 @@ namespace vorpal::stochastic {
 
             // After this many rounds without improvement, kill and start again.
             // Default: never kill.
-            uint64_t permissible_dead_rounds = UINT64_MAX;
+            uint64_t permissible_dead_rounds = 5000;
 
             // Output the best candidate's fitness and the number of rounds every this many rounds.
             uint64_t output_rounds = 1'000;
