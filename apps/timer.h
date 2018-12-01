@@ -14,6 +14,7 @@
 template<typename f>
 void run_timed(const std::string &name, f func, std::ostream &out = std::cerr) {
     out << "Beginning " << name << '\n';
+    std::flush(out);
     const auto start = std::chrono::system_clock::now();
     func();
     const auto stop = std::chrono::system_clock::now();

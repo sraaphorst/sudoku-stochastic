@@ -5,8 +5,6 @@ cmake_minimum_required(VERSION 3.12)
 project(sudoku_stochastic_top)
 
 set(CMAKE_CXX_STANDARD 17)
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -O3")
-
 if (MSVC)
     add_compile_options(/W4)
 else()
@@ -36,5 +34,4 @@ if (OPENMP_FOUND)
 endif()
 
 add_subdirectory(src)
-add_subdirectory(test)
 add_subdirectory(apps)

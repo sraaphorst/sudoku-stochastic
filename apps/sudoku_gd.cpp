@@ -6,33 +6,39 @@
 
 #include <iostream>
 #include <memory>
+#include <stdexcept>
+
+#include <boost/program_options.hpp>
 
 #include <GenSudokuBoard.h>
 #include <GenSudokuBoardAscenderPopulator.h>
 #include <GreatDelugeAlgorithm.h>
-#include <PredefinedBoards.h>
 
-#include "Timer.h"
+#include "progopts.h"
 
+namespace po = boost::program_options;
 using namespace vorpal::gensudoku;
 using namespace vorpal::stochastic;
 
-int main() {
-    run_timed("sudoku", []() {
-        // Configure the solver.
-        using solver = GreatDelugeAlgorithm<SudokuBoard>;
-        solver::option_type options;
-        options.populator = std::make_unique<SudokuBoardAscenderPopulator>(PredefinedBoards::benchmark_board);
-        options.fitness_success_threshold = SudokuBoard::PerfectFitness;
-        options.initial_water_level = 100;
-        options.rain_speed = 0.1;
+int main(int argc, const char * const argv[]) {
+    using solver = GreatDelugeAlgorithm<SudokuBoard>;
+    solver::options_type options;
 
-        const auto &sol = solver{}.run(options);
-        std::cerr << "Best solution found has fitness " << sol->fitness() << ":\n";
-        for (size_t row = 0; row < 9; ++row) {
-            for (size_t col = 0; col < 9; ++col)
-                std::cerr << (*sol)[row * 9 + col];
-            std::cerr << '\n';
-        }
-    });
+    try {
+        auto desc = init_options(options);
+        desc->add_options()
+                ("initial-water-level,w", po::value<double>()->default_value(100.0), "initial water level")
+                ("rain-speed,r", po::value<double>()->default_value(0.1), "rain speed");
+        auto done = end_options<SudokuBoardAscenderPopulator, solver::options_type>(argc, argv, desc, options,
+        [](po::variables_map &vm, solver::options_type &options) {
+            options.initial_water_level = vm["initial-water-level"].as<double>();
+            options.rain_speed          = vm["rain-speed"].as<double>();
+        });
+        if (done) return 0;
+    } catch (const std::exception &e) {
+        std::cerr << e.what() << '\n';
+        return 1;
+    }
+
+    run<solver>(options);
 }

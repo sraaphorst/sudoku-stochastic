@@ -8,6 +8,7 @@
 #include <memory>
 #include <optional>
 #include <stdexcept>
+#include <string>
 #include <vector>
 
 #include <boost/format.hpp>
@@ -18,7 +19,7 @@
 #include <GeneticAlgorithm.h>
 #include <PredefinedBoards.h>
 
-#include "Timer.h"
+#include "timer.h"
 
 namespace po = boost::program_options;
 using namespace vorpal::gensudoku;
@@ -64,7 +65,7 @@ int main(int argc, const char *argv[]) {
 
         po::options_description hidden{"Hidden options"};
         hidden.add_options()
-        ("board", po::value<std::vector<std::string>>(), "board");
+                ("board", po::value<std::vector<std::string>>(), "board");
         po::positional_options_description p;
         p.add("board", 1);
 
@@ -86,7 +87,7 @@ int main(int argc, const char *argv[]) {
         // Try to get the board.
         std::vector<std::string> board_vec = vm.count("board") ? vm["board"].as<std::vector<std::string>>() :
                 std::vector<std::string>{};
-        std::string board_str = board_vec.empty() ? "benchhmark_board" : board_vec[0];
+        std::string board_str = board_vec.empty() ? "benchmark_board" : board_vec[0];
 
         std::optional<SudokuBoard> board = PredefinedBoards::lookupBoard(board_str);
         options.populator = std::make_unique<SudokuBoardGAPopulator>(board ?

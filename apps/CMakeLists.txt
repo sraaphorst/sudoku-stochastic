@@ -4,17 +4,15 @@
 add_executable(sudoku_ga sudoku_ga.cpp)
 target_link_libraries(sudoku_ga PRIVATE stochastic ${Boost_PROGRAM_OPTIONS_LIBRARY} OpenMP::OpenMP_CXX)
 
-add_executable(sudoku_hc sudoku_hc.cpp)
-target_link_libraries(sudoku_hc PRIVATE stochastic)
+set(HEURISTICS
+        sudoku_hc
+        sudoku_bhc
+        sudoku_gd
+        sudoku_sa
+        sudoku_ts
+)
 
-add_executable(sudoku_bhc sudoku_bhc.cpp)
-target_link_libraries(sudoku_bhc PRIVATE stochastic)
-
-add_executable(sudoku_gd sudoku_gd.cpp)
-target_link_libraries(sudoku_gd PRIVATE stochastic)
-
-add_executable(sudoku_ts sudoku_ts.cpp)
-target_link_libraries(sudoku_ts PRIVATE stochastic)
-
-add_executable(sudoku_sa sudoku_sa.cpp)
-target_link_libraries(sudoku_sa PRIVATE stochastic)
+foreach (heuristic ${HEURISTICS})
+    add_executable(${heuristic} ${heuristic}.cpp)
+    target_link_libraries(${heuristic} PRIVATE stochastic ${Boost_PROGRAM_OPTIONS_LIBRARY})
+endforeach()

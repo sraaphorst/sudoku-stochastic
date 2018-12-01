@@ -38,7 +38,7 @@ namespace vorpal::stochastic {
         using state_type = details::TabuSearchState<T>;
 
     public:
-        using option_type = TabuSearchOptions<T, Fitness>;
+        using options_type = TabuSearchOptions<T, Fitness>;
         using pointer_type = std::unique_ptr<T>;
 
         TabuSearchAlgorithm() = default;
@@ -49,7 +49,7 @@ namespace vorpal::stochastic {
          * If we proceed, it rains and the water level increases.
          */
         bool accept(const pointer_type &next, const pointer_type &cur,
-                const option_type &options, std::unique_ptr<state_type> &state) override {
+                const options_type &options, std::unique_ptr<state_type> &state) override {
             // We only allow improvements in tabu search.
             if (next->fitness() < cur->fitness())
                 return false;

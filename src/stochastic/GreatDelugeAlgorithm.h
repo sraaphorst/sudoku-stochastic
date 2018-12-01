@@ -43,7 +43,7 @@ namespace vorpal::stochastic {
         using state_type = details::GreatDelugeState<W>;
 
     public:
-        using option_type = GreatDelugeOptions<T, W, Fitness>;
+        using options_type = GreatDelugeOptions<T, W, Fitness>;
         using pointer_type = std::unique_ptr<T>;
 
         GreatDelugeAlgorithm() = default;
@@ -52,7 +52,7 @@ namespace vorpal::stochastic {
         /**
          * Create a new state with the water level initialized from the options.
          */
-        std::unique_ptr<state_type> initState(const option_type &options) override {
+        std::unique_ptr<state_type> initState(const options_type &options) override {
             auto state = std::make_unique<state_type>();
             state->water_level = options.initial_water_level;
             return state;
@@ -63,7 +63,7 @@ namespace vorpal::stochastic {
          * If we proceed, it rains and the water level increases.
          */
         bool accept(const pointer_type &next, const pointer_type&,
-                const option_type &options, std::unique_ptr<state_type> &state) override {
+                const options_type &options, std::unique_ptr<state_type> &state) override {
             if (next->fitness() > state->water_level) {
                 state->water_level += options.rain_speed;
                 return true;

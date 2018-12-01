@@ -29,7 +29,7 @@ namespace vorpal::stochastic {
         uint64_t max_iterations_per_round = 200'000;
 
         // The maximum number of rounds before the problem gives up.
-        uint64_t max_rounds = UINT64_MAX;
+        uint64_t max_rounds = 1'000'000;
 
         // If a candidate achieves this fitness level or higher, the algorithm terminates successfully and the
         // candidate is returned.
@@ -47,11 +47,11 @@ namespace vorpal::stochastic {
     class HillClimbingAlgorithm {
         static_assert(std::is_arithmetic_v<Fitness>);
     public:
-        using option_type = Options;
+        using options_type = Options;
         using pointer_type = std::unique_ptr<T>;
 
     protected:
-        std::unique_ptr<option_type> options;
+        std::unique_ptr<options_type> options;
 
     public:
         HillClimbingAlgorithm() = default;
@@ -99,7 +99,7 @@ namespace vorpal::stochastic {
          * Create an initial state to store data about the heuristic
          * @return the initialized state
          */
-        virtual std::unique_ptr<State> initState(const option_type&) {
+        virtual std::unique_ptr<State> initState(const options_type&) {
             return std::make_unique<State>();
         }
 
@@ -110,7 +110,7 @@ namespace vorpal::stochastic {
          * @param cur current state state
          * @return true to accept the next state, false to reject it
          */
-        virtual bool accept(const pointer_type &next, const pointer_type &cur, const option_type&, std::unique_ptr<State>&) {
+        virtual bool accept(const pointer_type &next, const pointer_type &cur, const options_type&, std::unique_ptr<State>&) {
             return next->fitness() > cur->fitness();
         }
     };

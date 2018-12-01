@@ -6,32 +6,31 @@
 
 #include <iostream>
 #include <memory>
+#include <stdexcept>
+
+#include <boost/program_options.hpp>
 
 #include <GenSudokuBoard.h>
 #include <GenSudokuBoardAscenderPopulator.h>
-#include <AscenderPopulator.h>
 #include <HillClimbingAlgorithm.h>
-#include <PredefinedBoards.h>
 
-#include "Timer.h"
+#include "progopts.h"
 
 using namespace vorpal::gensudoku;
 using namespace vorpal::stochastic;
 
-int main() {
-    run_timed("sudoku", []() {
-        // Configure the solver.
-        using solver = HillClimbingAlgorithm<SudokuBoard, size_t>;
-        solver::option_type options;
-        options.populator = std::make_unique<SudokuBoardAscenderPopulator>(PredefinedBoards::benchmark_board);
-        options.fitness_success_threshold = SudokuBoard::PerfectFitness;
+int main(int argc, const char * const argv[]) {
+    using solver = HillClimbingAlgorithm<SudokuBoard>;
+    solver::options_type options;
 
-        const auto sol = solver{}.run(options);
-        std::cerr << "Best solution found has fitness " << sol->fitness() << ":\n";
-        for (size_t row = 0; row < 9; ++row) {
-            for (size_t col = 0; col < 9; ++col)
-                std::cerr << (*sol)[row * 9 + col];
-            std::cerr << '\n';
-        }
-    });
+    try {
+        auto desc = init_options(options);
+        auto done = end_options<SudokuBoardAscenderPopulator>(argc, argv, desc, options);
+        if (done) return 0;
+    } catch (const std::exception &e) {
+        std::cerr << e.what() << '\n';
+        return 1;
+    }
+
+    run<solver>(options);
 }
