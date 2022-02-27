@@ -1,4 +1,4 @@
-# sudoku_stochastic
+# Stochastic Sudoku
 
 **Current stats:** In progress.
 
